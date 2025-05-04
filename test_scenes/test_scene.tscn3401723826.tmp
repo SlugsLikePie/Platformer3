@@ -1,0 +1,84 @@
+[gd_scene load_steps=7 format=3 uid="uid://bckrbscq7i46c"]
+
+[ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://test_scenes/player_2d.gd" id="1_2ugl5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_54n8g"]
+size = Vector2(30, 100)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_54n8g"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2ugl5"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2ugl5"]
+size = Vector2(1480, 20)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_e5rb5"]
+
+[node name="TestScene" type="Node2D"]
+
+[node name="Player2D" type="CharacterBody2D" parent="."]
+position = Vector2(-1, -93)
+script = ExtResource("1_2ugl5")
+GROUND_MAX_SPEED = null
+GROUND_INITIAL_SPEED = null
+GROUND_ACCELERATION = null
+GROUND_DECELERATION = null
+GROUND_ZERO_THRESHOLD = null
+GROUND_OVERSPEED_DECELERATION = null
+AIR_INITIAL_SPEED = null
+AIR_OVERSPEED_DECELERATION = null
+DASH_MAX_SPEED = null
+DASH_MAX_DURATION = null
+JUMP_VELOCITY = null
+
+[node name="PlayerCollision2D" type="CollisionShape2D" parent="Player2D"]
+shape = SubResource("RectangleShape2D_54n8g")
+
+[node name="PlayerCamera2D" type="Camera2D" parent="Player2D"]
+
+[node name="Sprite2D" type="Sprite2D" parent="Player2D"]
+position = Vector2(0, -5.72205e-06)
+scale = Vector2(30, 100)
+texture = SubResource("CanvasTexture_54n8g")
+
+[node name="Ground2D2" type="StaticBody2D" parent="."]
+position = Vector2(743, 49)
+rotation = 2.43077
+scale = Vector2(0.08, 1)
+physics_material_override = SubResource("PhysicsMaterial_2ugl5")
+
+[node name="GroundCollision2D" type="CollisionShape2D" parent="Ground2D2"]
+position = Vector2(0, 60)
+shape = SubResource("RectangleShape2D_2ugl5")
+
+[node name="Sprite2D" type="Sprite2D" parent="Ground2D2"]
+position = Vector2(1, 60)
+scale = Vector2(1478, 20)
+texture = SubResource("CanvasTexture_e5rb5")
+
+[node name="Ground2D3" type="StaticBody2D" parent="."]
+position = Vector2(824, 10)
+rotation = -3.14159
+scale = Vector2(0.08, 0.9952)
+physics_material_override = SubResource("PhysicsMaterial_2ugl5")
+
+[node name="GroundCollision2D" type="CollisionShape2D" parent="Ground2D3"]
+position = Vector2(0, 60)
+shape = SubResource("RectangleShape2D_2ugl5")
+
+[node name="Sprite2D" type="Sprite2D" parent="Ground2D3"]
+position = Vector2(1, 60)
+scale = Vector2(1478, 20)
+texture = SubResource("CanvasTexture_e5rb5")
+
+[node name="Ground2D" type="StaticBody2D" parent="."]
+physics_material_override = SubResource("PhysicsMaterial_2ugl5")
+
+[node name="GroundCollision2D" type="CollisionShape2D" parent="Ground2D"]
+position = Vector2(0, 60)
+shape = SubResource("RectangleShape2D_2ugl5")
+
+[node name="Sprite2D" type="Sprite2D" parent="Ground2D"]
+position = Vector2(1, 60)
+scale = Vector2(1478, 20)
+texture = SubResource("CanvasTexture_e5rb5")
