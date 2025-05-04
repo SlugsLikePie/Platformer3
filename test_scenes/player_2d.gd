@@ -1,7 +1,7 @@
 extends CharacterBody2D
 
 var DEADBAND = 0.5
-
+# test
 @export var GROUND_MAX_SPEED = 600	
 @export var GROUND_INITIAL_SPEED = 6
 @export var GROUND_ACCELERATION = 6000
