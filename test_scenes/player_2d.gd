@@ -35,8 +35,9 @@ const DASH_MAX_DURATION := 0.14 * DASH_VELOCITY_SCALE
 
 # Jump consts
 const GROUND_JUMP_SPEED := 500
-const JUMP_CANCEL_SPEED := 200
-const WALL_JUMP_VELOCITY := Vector2(0, 500)
+const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY
+const WALL_CLIMBING_JUMP_VELOCITY := Vector2(200, 500)
+const WALL_SLIDING_JUMP_VELOCITY := Vector2(200, 100)
 
 
 # Grab consts
@@ -197,10 +198,12 @@ func _physics_process(delta: float) -> void:
 		if jump_input:
 			if is_on_floor():
 				velocity.y = -GROUND_JUMP_SPEED
-			elif is_on_left_wall:
-				print("left wall jump")
-			elif is_on_right_wall:
-				print("right wall jump")
+			elif is_climbing:
+				if lr_input == 0:
+					velocity.y = -WALL_CLIMBING_JUMP_VELOCITY.y
+			elif is_sliding:
+				if lr_input == 0:
+					velocity.y = -WALL_SLIDING_JUMP_VELOCITY.y
 
 	move_and_slide()
 	
