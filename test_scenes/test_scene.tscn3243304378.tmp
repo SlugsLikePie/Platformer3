@@ -30,16 +30,6 @@ size = Vector2(1480, 20)
 position = Vector2(-1, -93)
 position_smoothing_speed = 50.0
 
-[node name="DebugTextLabel" type="RichTextLabel" parent="PlayerCamera2D"]
-offset_left = -938.0
-offset_top = -521.0
-offset_right = -712.0
-offset_bottom = -138.0
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-script = ExtResource("3_kymn1")
-
 [node name="Player2D" type="CharacterBody2D" parent="."]
 position = Vector2(-1, -93)
 script = ExtResource("1_2ugl5")
@@ -71,6 +61,18 @@ lifetime = 3.2
 fixed_fps = 200
 process_material = SubResource("ParticleProcessMaterial_kymn1")
 
+[node name="RichTextLabel" type="RichTextLabel" parent="Player2D"]
+offset_left = -112.0
+offset_top = -92.0
+offset_right = 114.0
+offset_bottom = -52.0
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_kymn1")
+
 [node name="Ground2D2" type="StaticBody2D" parent="."]
 position = Vector2(743, 49)
 rotation = 2.43077
@@ -101,20 +103,6 @@ position = Vector2(1, 60)
 scale = Vector2(1478, 20)
 texture = SubResource("CanvasTexture_e5rb5")
 
-[node name="Ground2D5" type="StaticBody2D" parent="."]
-position = Vector2(842, -816)
-rotation = 4.71238
-physics_material_override = SubResource("PhysicsMaterial_2ugl5")
-
-[node name="GroundCollision2D" type="CollisionShape2D" parent="Ground2D5"]
-position = Vector2(0, 60)
-shape = SubResource("RectangleShape2D_2ugl5")
-
-[node name="Sprite2D" type="Sprite2D" parent="Ground2D5"]
-position = Vector2(1, 60)
-scale = Vector2(1478, 20)
-texture = SubResource("CanvasTexture_e5rb5")
-
 [node name="Ground2D4" type="StaticBody2D" parent="."]
 position = Vector2(-664, -677)
 rotation = 1.57079
@@ -141,7 +129,7 @@ position = Vector2(1, 60)
 scale = Vector2(1478, 20)
 texture = SubResource("CanvasTexture_e5rb5")
 
-[connection signal="velocity_updated" from="Player2D" to="PlayerCamera2D/DebugTextLabel" method="_on_player_2d_velocity_updated"]
+[connection signal="velocity_updated" from="Player2D" to="Player2D/RichTextLabel" method="_on_player_2d_velocity_updated"]
 [connection signal="body_entered" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_entered"]
 [connection signal="body_exited" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_exited"]
 [connection signal="body_entered" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_entered"]

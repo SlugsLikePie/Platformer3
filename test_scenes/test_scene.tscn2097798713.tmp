@@ -1,21 +1,14 @@
-[gd_scene load_steps=11 format=3 uid="uid://bckrbscq7i46c"]
+[gd_scene load_steps=8 format=3 uid="uid://bckrbscq7i46c"]
 
 [ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://test_scenes/player_2d.gd" id="1_2ugl5"]
-[ext_resource type="Texture2D" uid="uid://cx64og6fd8ydv" path="res://game_art_resources/player_placeholder_dash_particle.png" id="2_e5rb5"]
-[ext_resource type="Script" uid="uid://dsnyquodhwsd2" path="res://test_scenes/rich_text_label.gd" id="3_kymn1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_54n8g"]
 size = Vector2(30, 100)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_54n8g"]
 
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_2ugl5"]
-a = Vector2(2, -44)
-b = Vector2(2, 45)
-
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_kymn1"]
-particle_flag_disable_z = true
-gravity = Vector3(0, 0, 0)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_e5rb5"]
+size = Vector2(3, 90)
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_2ugl5"]
 
@@ -26,26 +19,14 @@ size = Vector2(1480, 20)
 
 [node name="TestScene" type="Node2D"]
 
-[node name="PlayerCamera2D" type="Camera2D" parent="."]
-position = Vector2(-1, -93)
-position_smoothing_speed = 50.0
-
-[node name="DebugTextLabel" type="RichTextLabel" parent="PlayerCamera2D"]
-offset_left = -938.0
-offset_top = -521.0
-offset_right = -712.0
-offset_bottom = -138.0
-fit_content = true
-scroll_active = false
-autowrap_mode = 0
-script = ExtResource("3_kymn1")
-
 [node name="Player2D" type="CharacterBody2D" parent="."]
 position = Vector2(-1, -93)
 script = ExtResource("1_2ugl5")
 
 [node name="PlayerCollision2D" type="CollisionShape2D" parent="Player2D"]
 shape = SubResource("RectangleShape2D_54n8g")
+
+[node name="PlayerCamera2D" type="Camera2D" parent="Player2D"]
 
 [node name="Sprite2D" type="Sprite2D" parent="Player2D"]
 position = Vector2(0, -5.72205e-06)
@@ -55,21 +36,14 @@ texture = SubResource("CanvasTexture_54n8g")
 [node name="LeftWallDetectionArea2D" type="Area2D" parent="Player2D"]
 
 [node name="LeftWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/LeftWallDetectionArea2D"]
-position = Vector2(-19, 0)
-shape = SubResource("SegmentShape2D_2ugl5")
+position = Vector2(-17, 0)
+shape = SubResource("RectangleShape2D_e5rb5")
 
 [node name="RightWallDetectionArea2D2" type="Area2D" parent="Player2D"]
 
 [node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/RightWallDetectionArea2D2"]
-position = Vector2(15, 0)
-shape = SubResource("SegmentShape2D_2ugl5")
-
-[node name="GPUParticles2D" type="GPUParticles2D" parent="Player2D"]
-amount = 2000
-texture = ExtResource("2_e5rb5")
-lifetime = 3.2
-fixed_fps = 200
-process_material = SubResource("ParticleProcessMaterial_kymn1")
+position = Vector2(17, 0)
+shape = SubResource("RectangleShape2D_e5rb5")
 
 [node name="Ground2D2" type="StaticBody2D" parent="."]
 position = Vector2(743, 49)
@@ -101,20 +75,6 @@ position = Vector2(1, 60)
 scale = Vector2(1478, 20)
 texture = SubResource("CanvasTexture_e5rb5")
 
-[node name="Ground2D5" type="StaticBody2D" parent="."]
-position = Vector2(842, -816)
-rotation = 4.71238
-physics_material_override = SubResource("PhysicsMaterial_2ugl5")
-
-[node name="GroundCollision2D" type="CollisionShape2D" parent="Ground2D5"]
-position = Vector2(0, 60)
-shape = SubResource("RectangleShape2D_2ugl5")
-
-[node name="Sprite2D" type="Sprite2D" parent="Ground2D5"]
-position = Vector2(1, 60)
-scale = Vector2(1478, 20)
-texture = SubResource("CanvasTexture_e5rb5")
-
 [node name="Ground2D4" type="StaticBody2D" parent="."]
 position = Vector2(-664, -677)
 rotation = 1.57079
@@ -141,8 +101,6 @@ position = Vector2(1, 60)
 scale = Vector2(1478, 20)
 texture = SubResource("CanvasTexture_e5rb5")
 
-[connection signal="velocity_updated" from="Player2D" to="PlayerCamera2D/DebugTextLabel" method="_on_player_2d_velocity_updated"]
 [connection signal="body_entered" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_entered"]
 [connection signal="body_exited" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_exited"]
 [connection signal="body_entered" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_entered"]
-[connection signal="body_exited" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_exited"]
