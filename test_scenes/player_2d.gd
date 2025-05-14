@@ -73,7 +73,8 @@ var ground_jumps := MAX_GROUND_JUMPS
 var air_jumps := MAX_AIR_JUMPS
 var is_jumping := false
 var jump_timer := 0.0
-var jump_cooldown_timer := 0.0
+var ground_jump_cooldown_timer := 0.0
+var air_jump_cooldown_timer := 0.0
 var jump_start_location := "ground"
 
 # Grab vars
@@ -132,7 +133,6 @@ func _physics_process(delta: float) -> void:
 		dashes = MAX_DASHES
 	elif not is_dashing:
 		dash_cooldown_timer += delta
-	print(dash_cooldown_timer)
 		
 	# Disables this block of code if the player is dashing or jumping to prevent other movements
 	if not is_dashing:
@@ -155,7 +155,7 @@ func _physics_process(delta: float) -> void:
 					velocity.y = SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET
 
 		# Add wall climbing
-		if is_grab_input_pressed and (is_on_left_wall or is_on_right_wall): # IS CLIMBING GOES HERE
+		if is_climbing:
 			if velocity.y <= CLIMB_MAX_SPEED and ud_input_axis > DEADBAND:
 				if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta <= CLIMB_MAX_SPEED:
 					velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
@@ -232,17 +232,15 @@ func _physics_process(delta: float) -> void:
 				if lr_input_axis == 0:
 					jump_start_location = "sliding"
 				ground_jumps -= 1
-
 			jump_timer = 0.0
 			is_jumping = true
 		elif is_jump_input_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
 			jump_start_location = "air"
 			air_jumps -= 1
-			
 			jump_timer = 0.0
 			is_jumping = true
-
-		if is_jumping and jump_timer <= JUMP_MAX_DURATION and is_jump_input_pressed:
+			
+		if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
 			jump_timer += delta
 			is_jump_just_released = false
 			if jump_start_location == "ground":
