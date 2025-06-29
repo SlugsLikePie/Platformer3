@@ -1,26 +1,28 @@
-[gd_scene load_steps=8 format=3 uid="uid://bckrbscq7i46c"]
+[gd_scene load_steps=9 format=3 uid="uid://bckrbscq7i46c"]
 
 [ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://test_scenes/player_2d.gd" id="1_2ugl5"]
 [ext_resource type="Texture2D" uid="uid://cx64og6fd8ydv" path="res://game_art_resources/player_placeholder_dash_particle.png" id="2_e5rb5"]
 [ext_resource type="Script" uid="uid://dsnyquodhwsd2" path="res://test_scenes/rich_text_label.gd" id="3_kymn1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_54n8g"]
-size = Vector2(30, 100)
+size = Vector2(16, 28)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_54n8g"]
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_2ugl5"]
-a = Vector2(2, -44)
-b = Vector2(2, 45)
+a = Vector2(0, -8)
+b = Vector2(0, 8)
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_kymn1"]
 particle_flag_disable_z = true
 gravity = Vector3(0, 0, 0)
 
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_kymn1"]
+
 [node name="TestScene" type="Node2D"]
 
 [node name="Player2D" type="CharacterBody2D" parent="."]
-position = Vector2(-1, -93)
+position = Vector2(0, -16)
 script = ExtResource("1_2ugl5")
 
 [node name="PlayerCollision2D" type="CollisionShape2D" parent="Player2D"]
@@ -28,19 +30,19 @@ shape = SubResource("RectangleShape2D_54n8g")
 
 [node name="Sprite2D" type="Sprite2D" parent="Player2D"]
 position = Vector2(0, -5.72205e-06)
-scale = Vector2(30, 100)
+scale = Vector2(16, 32)
 texture = SubResource("CanvasTexture_54n8g")
 
 [node name="LeftWallDetectionArea2D" type="Area2D" parent="Player2D"]
+position = Vector2(-9, 0)
 
 [node name="LeftWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/LeftWallDetectionArea2D"]
-position = Vector2(-19, 0)
 shape = SubResource("SegmentShape2D_2ugl5")
 
 [node name="RightWallDetectionArea2D2" type="Area2D" parent="Player2D"]
+position = Vector2(9, 0)
 
 [node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/RightWallDetectionArea2D2"]
-position = Vector2(15, 0)
 shape = SubResource("SegmentShape2D_2ugl5")
 
 [node name="GPUParticles2D" type="GPUParticles2D" parent="Player2D"]
@@ -50,10 +52,11 @@ lifetime = 3.2
 fixed_fps = 200
 process_material = SubResource("ParticleProcessMaterial_kymn1")
 
-[node name="PlayerCamera2D" type="Camera2D" parent="Player2D"]
+[node name="PlayerCamera2D" type="Camera2D" parent="."]
+position = Vector2(-1, -90)
 position_smoothing_speed = 50.0
 
-[node name="DebugTextLabel" type="RichTextLabel" parent="Player2D/PlayerCamera2D"]
+[node name="DebugTextLabel" type="RichTextLabel" parent="PlayerCamera2D"]
 offset_left = -938.0
 offset_top = -521.0
 offset_right = -712.0
@@ -63,7 +66,27 @@ scroll_active = false
 autowrap_mode = 0
 script = ExtResource("3_kymn1")
 
-[connection signal="velocity_updated" from="Player2D" to="Player2D/PlayerCamera2D/DebugTextLabel" method="_on_player_2d_velocity_updated"]
+[node name="WorldWalls" type="StaticBody2D" parent="."]
+
+[node name="Left" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(-160, -96)
+rotation = 1.5708
+shape = SubResource("WorldBoundaryShape2D_kymn1")
+
+[node name="Right" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(160, -96)
+rotation = -1.5708
+shape = SubResource("WorldBoundaryShape2D_kymn1")
+
+[node name="Up" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(0, -184)
+rotation = -3.14159
+shape = SubResource("WorldBoundaryShape2D_kymn1")
+
+[node name="Down" type="CollisionShape2D" parent="WorldWalls"]
+shape = SubResource("WorldBoundaryShape2D_kymn1")
+
+[connection signal="velocity_updated" from="Player2D" to="PlayerCamera2D/DebugTextLabel" method="_on_player_2d_velocity_updated"]
 [connection signal="body_entered" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_entered"]
 [connection signal="body_exited" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_exited"]
 [connection signal="body_entered" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_entered"]
