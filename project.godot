@@ -20,8 +20,8 @@ config/icon="res://icon.svg"
 window/size/viewport_width=320
 window/size/viewport_height=180
 window/size/resizable=false
-window/size/window_width_override=2880
-window/size/window_height_override=1920
+window/size/window_width_override=1440
+window/size/window_height_override=960
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
 
@@ -83,8 +83,13 @@ jump={
 ]
 }
 
+[physics]
+
+2d/physics_engine="GodotPhysics2D"
+2d/default_gravity=1200.0
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
 textures/lossless_compression/force_png=true
-2d/snap/snap_2d_vertices_to_pixel=true
+2d/snap/snap_2d_transforms_to_pixel=true

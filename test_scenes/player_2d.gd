@@ -3,7 +3,7 @@ extends CharacterBody2D
 # Signals
 signal velocity_updated
 
-# Genderal input consts
+# General input consts
 const DEADBAND = 0.5
 
 # lr movement consts
@@ -44,12 +44,58 @@ const WALL_SLIDING_JUMP_VELOCITY := Vector2(200, 100)
 const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY PROBABLY DELETE
 const JUMP_MAX_DURATION := 0.1
 
-
 # Grab consts
 const GRAB_VELOCITY := 1 # UNUSED CURRENTLY
 
+# Player state 
+enum State {
+	IDLING,
+	WALKING,
+	DASHING,
+	JUMPING,
+	WALLING,
+	FALLING
+}
+
+enum Walking_Substate {
+	AIR_WALKING,
+	GROUND_WALKING
+}
+
+enum Dashing_Substate {
+	UP,
+	UP_RIGHT,
+	RIGHT,
+	DOWN_RIGHT,
+	DOWN,
+	DOWN_LEFT,
+	LEFT,
+	UP_LEFT,
+}
+
+enum Jumping_Substate { }
+
+enum Walling_Substate {
+	SLOW_SLIDING,
+	PASSIVE_SLIDING,
+	FAST_SLIDING,
+	CLIMBING,
+	JUMPING
+}
+
+enum Falling_Substate {
+	SLOW_FALLING,
+	PASSIVE_FALLING,
+	FAST_FALLING
+}
+
 # Physics vars
 var gravity = Vector2(0, 0)
+
+# Environment info vars
+var is_on_ground := false
+var is_on_left_wall := false
+var is_on_right_wall := false
 
 # Movement vars
 var is_facing_right = true
@@ -80,18 +126,21 @@ var jump_start_location := "ground"
 # Grab vars
 var is_grab_inverted := true
 var is_grab_input_pressed := (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
-var is_on_left_wall := false
-var is_on_right_wall := false
 var is_climbing := false
 var is_sliding := false
 
+# State vars
+var state := State.IDLING
+var walking_substate := Walking_Substate.GROUND_WALKING
+#var dashing_substate := Dashing_Substate
+#var jumping_substate := Jumping_Substate
+var walling_substate := Walling_Substate.PASSIVE_SLIDING
+var falling_substate := Falling_Substate.PASSIVE_FALLING
+
 #func _process(delta: float) -> void:
 
-func _physics_process(delta: float) -> void:
-	velocity_updated.emit(delta, velocity)
-	
-	gravity = get_gravity() * 1.3
-	
+# MOVE USER INPUTS TO A _INPUT/_UNHANDLES_INPUT FUNC OR SOMETHING PROBABLY
+func get_inputs() -> void:
 	lr_input_axis = Input.get_axis("left", "right")
 	ud_input_axis = Input.get_axis("up", "down")
 
@@ -100,8 +149,77 @@ func _physics_process(delta: float) -> void:
 	is_jump_input_pressed = Input.is_action_pressed("jump")
 	
 	is_grab_input_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
-	is_climbing = is_grab_input_pressed and (is_on_left_wall or is_on_right_wall)
+
+
+func _physics_process(delta: float) -> void:
+	# Debug outputs
+	velocity_updated.emit(delta, velocity)
+	
+	get_inputs()
+
+	gravity = get_gravity()
+	
+	# STATE MACHINE REWRITE
+	print(lr_input_axis)
+	# Player state 	
+	match state:
+		State.IDLING:
+			print("IDLING")
+			# State handling
+			
+			
+			# State transition handling
+			if abs(lr_input_axis) > 0:
+				state = State.WALKING
+			
+			if is_dash_input_just_pressed:
+				state = State.DASHING
+			
+			if is_jump_input_pressed:
+				state = State.JUMPING
+			
+			if is_grab_input_pressed:
+				state = State.WALLING
+			
+			if not is_on_ground:
+				state = State.FALLING
+			
+		State.WALKING:
+			print("WALKING")
+			# State handling
+			
+			
+			# State transition handling
+			if abs(lr_input_axis) == 0:
+				state = State.IDLING
+			
+			if is_dash_input_just_pressed:
+				state = State.DASHING
+			
+			if is_jump_input_pressed:
+				state = State.JUMPING
+			
+			if is_grab_input_pressed:
+				state = State.WALLING
+			
+			# SHOULD BE HANDLED BY SUBSTATE
+			#if not is_on_ground:
+				#state = State.FALLING
+			
+		State.DASHING:
+			print("DASHING")
+		State.JUMPING:
+			print("JUMPING")
+		State.WALLING:
+			print("WALLING")
+		State.FALLING:
+			print("FALLING")
+	
+	# TODO CASES PAST HERE MOSTLY, OLD CODE
+	
+	is_climbing = is_grab_input_pressed and (is_on_left_wall or is_on_right_wall) 
 	is_sliding = not is_grab_input_pressed and (is_on_left_wall or is_on_right_wall)
+	
 	
 	# Add dashing
 	# Starts dash
@@ -268,11 +386,21 @@ func _on_left_wall_detection_area_2d_body_exited(body: Node2D) -> void:
 		is_on_left_wall = false
 
 
-func _on_right_wall_detection_area_2d_2_body_entered(body: Node2D) -> void:
+func _on_right_wall_detection_area_2d_body_entered(body: Node2D) -> void:
 	if body.get_name() != "Player2D":
 		is_on_right_wall = true
 
 
-func _on_right_wall_detection_area_2d_2_body_exited(body: Node2D) -> void:
+func _on_right_wall_detection_area_2d_body_exited(body: Node2D) -> void:
 	if body.get_name() != "Player2D":
 		is_on_right_wall = false
+
+
+func _on_ground_detection_area_2d_body_entered(body: Node2D) -> void:
+	if body.get_name() != "Player2D":
+		is_on_ground = true
+	
+
+func _on_ground_detection_area_2d_body_exited(body: Node2D) -> void:
+	if body.get_name() != "Player2D":
+		is_on_ground = false

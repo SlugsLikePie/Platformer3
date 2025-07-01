@@ -1,11 +1,11 @@
-[gd_scene load_steps=9 format=3 uid="uid://bckrbscq7i46c"]
+[gd_scene load_steps=12 format=3 uid="uid://bckrbscq7i46c"]
 
 [ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://test_scenes/player_2d.gd" id="1_2ugl5"]
-[ext_resource type="Texture2D" uid="uid://cx64og6fd8ydv" path="res://game_art_resources/player_placeholder_dash_particle.png" id="2_e5rb5"]
+[ext_resource type="Texture2D" uid="uid://dw1kwwcx5xkoq" path="res://game_art_resources/test_scene.png" id="3_ifg33"]
 [ext_resource type="Script" uid="uid://dsnyquodhwsd2" path="res://test_scenes/rich_text_label.gd" id="3_kymn1"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_54n8g"]
-size = Vector2(16, 28)
+size = Vector2(8, 16)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_54n8g"]
 
@@ -13,11 +13,20 @@ size = Vector2(16, 28)
 a = Vector2(0, -8)
 b = Vector2(0, 8)
 
-[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_kymn1"]
-particle_flag_disable_z = true
-gravity = Vector3(0, 0, 0)
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_kymn1"]
+a = Vector2(3, 0)
+b = Vector2(-5, 0)
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_kymn1"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kymn1"]
+size = Vector2(48, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ifg33"]
+size = Vector2(320, 8)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kymn1"]
+radius = 32.0
 
 [node name="TestScene" type="Node2D"]
 
@@ -29,38 +38,38 @@ script = ExtResource("1_2ugl5")
 shape = SubResource("RectangleShape2D_54n8g")
 
 [node name="Sprite2D" type="Sprite2D" parent="Player2D"]
-position = Vector2(0, -5.72205e-06)
-scale = Vector2(16, 32)
+position = Vector2(-4, -8)
+scale = Vector2(8, 16)
 texture = SubResource("CanvasTexture_54n8g")
 
 [node name="LeftWallDetectionArea2D" type="Area2D" parent="Player2D"]
-position = Vector2(-9, 0)
+position = Vector2(-5, 0)
 
 [node name="LeftWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/LeftWallDetectionArea2D"]
 shape = SubResource("SegmentShape2D_2ugl5")
 
-[node name="RightWallDetectionArea2D2" type="Area2D" parent="Player2D"]
-position = Vector2(9, 0)
+[node name="RightWallDetectionArea2D" type="Area2D" parent="Player2D"]
+position = Vector2(5, 0)
 
-[node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/RightWallDetectionArea2D2"]
+[node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="Player2D/RightWallDetectionArea2D"]
 shape = SubResource("SegmentShape2D_2ugl5")
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="Player2D"]
-amount = 2000
-texture = ExtResource("2_e5rb5")
-lifetime = 3.2
-fixed_fps = 200
-process_material = SubResource("ParticleProcessMaterial_kymn1")
+[node name="GroundDetectionArea2D" type="Area2D" parent="Player2D"]
+position = Vector2(0, 9)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player2D/GroundDetectionArea2D"]
+position = Vector2(1, 0)
+shape = SubResource("SegmentShape2D_kymn1")
 
 [node name="PlayerCamera2D" type="Camera2D" parent="."]
 position = Vector2(-1, -90)
 position_smoothing_speed = 50.0
 
 [node name="DebugTextLabel" type="RichTextLabel" parent="PlayerCamera2D"]
-offset_left = -938.0
-offset_top = -521.0
-offset_right = -712.0
-offset_bottom = -138.0
+offset_left = -155.0
+offset_top = -86.0
+offset_right = 71.0
+offset_bottom = 297.0
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
@@ -69,7 +78,7 @@ script = ExtResource("3_kymn1")
 [node name="WorldWalls" type="StaticBody2D" parent="."]
 
 [node name="Left" type="CollisionShape2D" parent="WorldWalls"]
-position = Vector2(-160, -96)
+position = Vector2(-162, -96)
 rotation = 1.5708
 shape = SubResource("WorldBoundaryShape2D_kymn1")
 
@@ -86,8 +95,28 @@ shape = SubResource("WorldBoundaryShape2D_kymn1")
 [node name="Down" type="CollisionShape2D" parent="WorldWalls"]
 shape = SubResource("WorldBoundaryShape2D_kymn1")
 
+[node name="TestScene" type="Sprite2D" parent="."]
+position = Vector2(-1, -90)
+texture = ExtResource("3_ifg33")
+
+[node name="StaticBody2D" type="StaticBody2D" parent="TestScene"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TestScene/StaticBody2D"]
+position = Vector2(-80, 66)
+shape = SubResource("RectangleShape2D_kymn1")
+
+[node name="CollisionShape2D2" type="CollisionShape2D" parent="TestScene/StaticBody2D"]
+position = Vector2(0, 86)
+shape = SubResource("RectangleShape2D_ifg33")
+
+[node name="CollisionShape2D3" type="CollisionShape2D" parent="TestScene/StaticBody2D"]
+position = Vector2(-104, -30)
+shape = SubResource("CircleShape2D_kymn1")
+
 [connection signal="velocity_updated" from="Player2D" to="PlayerCamera2D/DebugTextLabel" method="_on_player_2d_velocity_updated"]
 [connection signal="body_entered" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_entered"]
 [connection signal="body_exited" from="Player2D/LeftWallDetectionArea2D" to="Player2D" method="_on_left_wall_detection_area_2d_body_exited"]
-[connection signal="body_entered" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_entered"]
-[connection signal="body_exited" from="Player2D/RightWallDetectionArea2D2" to="Player2D" method="_on_right_wall_detection_area_2d_2_body_exited"]
+[connection signal="body_entered" from="Player2D/RightWallDetectionArea2D" to="Player2D" method="_on_right_wall_detection_area_2d_body_entered"]
+[connection signal="body_exited" from="Player2D/RightWallDetectionArea2D" to="Player2D" method="_on_right_wall_detection_area_2d_body_exited"]
+[connection signal="body_entered" from="Player2D/GroundDetectionArea2D" to="Player2D" method="_on_ground_detection_area_2d_body_entered"]
+[connection signal="body_exited" from="Player2D/GroundDetectionArea2D" to="Player2D" method="_on_ground_detection_area_2d_body_exited"]
