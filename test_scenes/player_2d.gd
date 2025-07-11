@@ -2,15 +2,16 @@ extends CharacterBody2D
 
 # Signals
 signal velocity_updated
+signal position_updated
 
 # General input consts
 const DEADBAND = 0.5
 
 # lr movement consts
-const GROUND_MAX_SPEED := 400
-const GROUND_ACCELERATION := 6000
-const GROUND_DECELERATION := 9000
-const GROUND_ZERO_VELOCITY_THRESHOLD := 120
+const GROUND_MAX_SPEED := 150
+const GROUND_ACCELERATION := 6000 / 2
+const GROUND_DECELERATION := 9000 / 2
+const GROUND_ZERO_VELOCITY_THRESHOLD := 120 / 2
 const AIR_MAX_SPEED := GROUND_MAX_SPEED
 const AIR_ACCELERATION := GROUND_ACCELERATION * 0.75
 const AIR_DECELERATION := GROUND_DECELERATION * 0.75
@@ -152,8 +153,8 @@ func get_inputs() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	# Debug outputs
 	velocity_updated.emit(delta, velocity)
+	position_updated.emit(delta, position)
 	
 	get_inputs()
 
