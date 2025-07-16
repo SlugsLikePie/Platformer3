@@ -29,7 +29,7 @@ const SLIDE_PASSIVE_ACCELERATION := 1000 / 2
 const SLIDE_ACTIVE_SPEED_OFFSET := 100 / 2
 const SLIDE_ACTIVE_ACCELERATION_OFFSET := 100 / 2
 
-# Dash constsa 
+# Dash consts
 const DASH_VELOCITY_SCALE = 1.9 * 2
 const MAX_DASHES := 1
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
@@ -40,8 +40,8 @@ const DASH_COOLDOWN_DURATION := 0.2
 # Jump consts
 const GROUND_JUMP_SPEED := 300 / 2
 const AIR_JUMP_SPEED := 250 / 2
-const WALL_CLIMBING_JUMP_VELOCITY := Vector2(200, 500) / 2
-const WALL_SLIDING_JUMP_VELOCITY := Vector2(200, 100) / 2
+const CLIMBING_JUMP_VELOCITY := Vector2(200, 500) / 2
+const SLIDING_JUMP_VELOCITY := Vector2(200, 100) / 2
 const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY PROBABLY DELETE
 const JUMP_MAX_DURATION := 0.1
 
@@ -52,18 +52,20 @@ const GRAB_VELOCITY := 1 # UNUSED CURRENTLY
 enum State {
 	IDLING,
 	WALKING,
+	WALLING,
 	DASHING,
 	JUMPING,
-	WALLING,
-	# FALLING
+	FALLING
 }
 
-enum Walking_Substate { 
-	GROUNDED,
-	JUMPING,
-	SLOW_FALLING,
-	PASSIVE_FALLING,
-	FAST_FALLING
+enum Walking_Substate { }
+
+enum Walling_Substate {
+	SLOW_SLIDING,
+	PASSIVE_SLIDING,
+	FAST_SLIDING,
+	CLIMBING,
+	JUMPING
 }
 
 enum Dashing_Substate {
@@ -77,14 +79,17 @@ enum Dashing_Substate {
 	UP_LEFT,
 }
 
-enum Jumping_Substate { }
+enum Jumping_Substate { 
+	GROUND_JUMPING,
+	CLIMB_JUMPING,
+	SLIDE_JUMPING,
+	AIR_JUMPING
+}
 
-enum Walling_Substate {
-	SLOW_SLIDING,
-	PASSIVE_SLIDING,
-	FAST_SLIDING,
-	CLIMBING,
-	JUMPING
+enum Falling_Substate {
+	SLOW_FALLING,
+	PASSIVE_FALLING,
+	FAST_FALLING
 }
 
 # Physics vars
@@ -117,6 +122,8 @@ var is_jump_just_released = Input.is_action_just_released("jump")
 var ground_jumps := MAX_GROUND_JUMPS
 var air_jumps := MAX_AIR_JUMPS
 var is_jumping := false
+var can_ground_jump := false
+var can_air_jump := false
 var jump_timer := 0.0
 var ground_jump_cooldown_timer := 0.0
 var air_jump_cooldown_timer := 0.0
@@ -131,13 +138,12 @@ var is_sliding := false
 
 # State vars
 var state := State.IDLING
-var walking_substate := Walking_Substate.GROUNDED
-#var dashing_substate := Dashing_Substate
-#var jumping_substate := Jumping_Substate
+var walking_substate := Walking_Substate
 var walling_substate := Walling_Substate.PASSIVE_SLIDING
+var dashing_substate := Dashing_Substate
+var jumping_substate := Jumping_Substate.GROUND_JUMPING
 
 # func _process(delta: float) -> void:
-	# print(Engine.get_frames_per_second())
 
 # MOVE USER INPUTS TO A _INPUT/_UNHANDLES_INPUT FUNC OR SOMETHING PROBABLY
 func get_inputs() -> void:
@@ -189,22 +195,26 @@ func apply_air_walking(delta: float) -> void:
 			velocity.x = 0
 
 func _physics_process(delta: float) -> void:
+	# Signals emit
 	velocity_updated.emit(delta, velocity)
 	position_updated.emit(delta, position)
 	
+	# HID acquisition
 	get_inputs()
 
+	# Physics configuration
 	gravity = get_gravity()
 
+	# Ability acquisition
 	can_dash = is_dash_input_just_pressed and not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
+	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
+	can_air_jump = air_jumps > 0
 	
-	# STATE MACHINE REWRITE
-	print(lr_input_axis)
 	# Player state 	
 	match state:
 		State.IDLING:
-			print("IDLING")
+			# print("IDLING")
 			# State handling
 			
 			
@@ -212,100 +222,139 @@ func _physics_process(delta: float) -> void:
 			if abs(lr_input_axis) > 0 or not is_on_ground:
 				state = State.WALKING
 			
+			if is_grab_input_pressed and can_wall:
+				state = State.WALLING
+
 			if is_dash_input_just_pressed:
 				state = State.DASHING
 			
 			if is_jump_input_pressed:
 				state = State.JUMPING
-			
-			if is_grab_input_pressed and can_wall:
-				state = State.WALLING
+
+			if not is_on_ground:
+				state = State.FALLING
 
 			
 		State.WALKING:
-			print("WALKING")
+			# print("WALKING")
 			# State handling
-			# Substate selection handling
-			if is_on_ground:
-				walking_substate = Walking_Substate.GROUNDED
-			else:
-				# IMPLEMENT FAST/SLOW FALLING HERE L8R
-				walking_substate = Walking_Substate.PASSIVE_FALLING
-
-			# Substate transition handling
-			match walking_substate:
-				Walking_Substate.GROUNDED:
-					print("GROUNDED")
-					apply_ground_walking(delta)
-				
-				Walking_Substate.JUMPING:
-					print("JUMPING")
-
-				Walking_Substate.SLOW_FALLING:
-					print("SLOW_FALLING")
-					apply_air_walking(delta)
-
-				Walking_Substate.PASSIVE_FALLING:
-					print("PASSIVE_FALLING")
-					velocity.y += gravity.y * delta
-					apply_air_walking(delta)
-
-				Walking_Substate.FAST_FALLING:
-					print("FAST_FALLING")
-					apply_air_walking(delta)
+			apply_ground_walking(delta)
 					
 			
 			# State transition handling
 			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
 				state = State.IDLING
+
+			if is_grab_input_pressed and can_wall:
+				state = State.WALLING
 			
 			if is_dash_input_just_pressed:
 				state = State.DASHING
 			
 			if is_jump_input_pressed:
 				state = State.JUMPING
-			
-			if is_grab_input_pressed and can_wall:
-				state = State.WALLING
-			
-		State.DASHING:
-			print("DASHING")
+
+			if not is_on_ground:
+				state = State.FALLING
+
+		State.WALLING:
+			# print("WALLING")
 			# State handling
 			
 			
 			# State transition handling
-			if is_on_ground:
+			if not can_wall or not is_grab_input_pressed:
+				state = State.WALKING
+
+			if is_jump_input_pressed:
+				state = State.JUMPING
+			
+		State.DASHING:
+			# print("DASHING")
+			# State handling
+			
+			
+			# State transition handling
+			if is_on_ground or not is_dashing:
 				state = State.WALKING
 
 			if can_wall:
 				state = State.WALLING
 
-			if not is_dashing:
-				state = State.WALKING
-
 		State.JUMPING:
-			print("JUMPING")
+			# print("JUMPING")
 			# State handling
+			apply_air_walking(delta)
+
+			if is_on_ground or is_climbing or is_sliding:
+				ground_jumps = MAX_GROUND_JUMPS
+				air_jumps = MAX_AIR_JUMPS
+
+			if can_ground_jump:
+				if is_jump_input_pressed:
+					is_jumping = true
+					jump_timer = 0.0
+					print(MAX_AIR_JUMPS)
 			
-			
+				# Substate selection
+				if is_on_ground:
+					jumping_substate = Jumping_Substate.GROUND_JUMPING
+					ground_jumps -= 1
+
+				elif is_climbing:
+					jumping_substate = Jumping_Substate.CLIMB_JUMPING
+					ground_jumps -= 1
+
+				elif is_sliding:
+					jumping_substate = Jumping_Substate.SLIDE_JUMPING
+					ground_jumps -= 1
+				
+				if Input.is_action_pressed("jump"):
+					is_jump_just_released = true
+
+			if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
+				jump_timer += delta
+				is_jump_just_released = false
+				match jumping_substate:
+					Jumping_Substate.GROUND_JUMPING:
+						# print("GROUND_JUMPING")
+						velocity.y = -GROUND_JUMP_SPEED
+
+						if is_jump_just_released:
+							print(1)
+
+					Jumping_Substate.CLIMB_JUMPING:
+						# print("CLIMB_JUMPING")
+						velocity.y = -CLIMBING_JUMP_VELOCITY.y
+
+					Jumping_Substate.SLIDE_JUMPING:
+						# print("SLIDE_JUMPING")
+						velocity.y = -SLIDING_JUMP_VELOCITY.y
+					
+					Jumping_Substate.AIR_JUMPING:
+						# print("AIR_JUMPING")
+						velocity.y = -AIR_JUMP_SPEED
+			else:
+				is_jumping = false
+
+
+
 			# State transition handling
-			if not is_jumping:
+			if not is_jumping and is_on_ground:
 				state = State.WALKING
 
-		State.WALLING:
-			print("WALLING")
-			# State handling
-			
-			
-			# State transition handling
-			if not can_wall:
-				state = State.WALKING
+			if not is_jumping and not is_on_ground:
+				state = State.FALLING
 
-			if not is_grab_input_pressed:
-				state = State.WALKING
+		
+		State.FALLING:
+			# print("FALLING")
+			# State handling // NEED TO IMPLEMENT SUBSTATES
+			apply_air_walking(delta) 
+			velocity.y += gravity.y * delta
 
-			if is_jump_input_pressed:
-				state = State.JUMPING
+			if is_on_ground:
+				state = State.WALKING
 
 	# TODO CASES PAST HERE MOSTLY, OLD CODE
 	
@@ -424,48 +473,48 @@ func _physics_process(delta: float) -> void:
 		# 			velocity.x = 0
 		# Add jumping # NEED TO REPLACE IS_ON_FLOOR W/ AREA CHECK AT SOME POINT # NEED TO ADD VARIABLE HEIGHT JUMPING
 		# NEED TO IMPLEMENT SUPERS/HYPERS? WHICH REQUIRES MODIFYING DASH (REWRITE TO NOT USE LERP AND TO ADD VELO INSTEAD OF SETTING)
-		if is_on_floor() or is_climbing or is_sliding:
-			ground_jumps = MAX_GROUND_JUMPS
-			air_jumps = MAX_AIR_JUMPS
+		# if is_on_floor() or is_climbing or is_sliding:
+		# 	ground_jumps = MAX_GROUND_JUMPS
+		# 	air_jumps = MAX_AIR_JUMPS
 		
-		if Input.is_action_just_released("jump"):
-			is_jump_just_released = true
+		# if Input.is_action_just_released("jump"):
+		# 	is_jump_just_released = true
 		
-		if is_jump_input_pressed and ground_jumps > 0 and not is_jumping and (is_on_floor() or is_climbing or is_sliding):
-			if is_on_floor():
-				jump_start_location = "ground"
-				ground_jumps -= 1
-			elif is_climbing:
-				if lr_input_axis == 0:
-					jump_start_location = "climbing"
-				ground_jumps -= 1
-			elif is_sliding:
-				if lr_input_axis == 0:
-					jump_start_location = "sliding"
-				ground_jumps -= 1
-			jump_timer = 0.0
-			is_jumping = true
-		elif is_jump_input_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
-			jump_start_location = "air"
-			air_jumps -= 1
-			jump_timer = 0.0
-			is_jumping = true
+		# if is_jump_input_pressed and ground_jumps > 0 and not is_jumping and (is_on_floor() or is_climbing or is_sliding):
+		# 	if is_on_floor():
+		# 		jump_start_location = "ground"
+		# 		ground_jumps -= 1
+		# 	elif is_climbing:
+		# 		if lr_input_axis == 0:
+		# 			jump_start_location = "climbing"
+		# 		ground_jumps -= 1
+		# 	elif is_sliding:
+		# 		if lr_input_axis == 0:
+		# 			jump_start_location = "sliding"
+		# 		ground_jumps -= 1
+		# 	jump_timer = 0.0
+		# 	is_jumping = true
+		# elif is_jump_input_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
+		# 	jump_start_location = "air"
+		# 	air_jumps -= 1
+		# 	jump_timer = 0.0
+		# 	is_jumping = true
 			
-		if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
-			jump_timer += delta
-			is_jump_just_released = false
-			if jump_start_location == "ground":
-				velocity.y = -GROUND_JUMP_SPEED
-			elif jump_start_location == "climbing":
-				if lr_input_axis == 0:
-					velocity.y = -WALL_CLIMBING_JUMP_VELOCITY.y
-			elif jump_start_location == "sliding":
-				if lr_input_axis == 0:
-					velocity.y = -WALL_SLIDING_JUMP_VELOCITY.y
-			elif jump_start_location == "air":
-				velocity.y = -AIR_JUMP_SPEED
-		else:
-			is_jumping = false
+		# if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
+		# 	jump_timer += delta
+		# 	is_jump_just_released = false
+		# 	if jump_start_location == "ground":
+		# 		velocity.y = -GROUND_JUMP_SPEED
+		# 	elif jump_start_location == "climbing":
+		# 		if lr_input_axis == 0:
+		# 			velocity.y = -CLIMBING_JUMP_VELOCITY.y
+		# 	elif jump_start_location == "sliding":
+		# 		if lr_input_axis == 0:
+		# 			velocity.y = -SLIDING_JUMP_VELOCITY.y
+		# 	elif jump_start_location == "air":
+		# 		velocity.y = -AIR_JUMP_SPEED
+		# else:
+		# 	is_jumping = false
 
 	move_and_slide()
 
