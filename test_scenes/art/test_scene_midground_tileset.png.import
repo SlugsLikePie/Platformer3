@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cx64og6fd8ydv"
-path="res://.godot/imported/player_placeholder_dash_particle.png-643b34e5d129d4353c58f92ded636055.ctex"
+uid="uid://50eupvcnw52e"
+path="res://.godot/imported/test_scene_midground_tileset.png-fd64120a42a3904ab1bf396af9a9b02b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://game_art_resources/player_placeholder_dash_particle.png"
-dest_files=["res://.godot/imported/player_placeholder_dash_particle.png-643b34e5d129d4353c58f92ded636055.ctex"]
+source_file="res://test_scenes/art/test_scene_midground_tileset.png"
+dest_files=["res://.godot/imported/test_scene_midground_tileset.png-fd64120a42a3904ab1bf396af9a9b02b.ctex"]
 
 [params]
 
