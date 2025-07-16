@@ -127,6 +127,7 @@ position_smoothing_speed = 50.0
 script = ExtResource("2_rrv6s")
 
 [node name="DebugTextLabel" type="RichTextLabel" parent="PlayerCamera2D"]
+z_index = 2
 offset_left = -155.0
 offset_top = -86.0
 offset_right = 71.0

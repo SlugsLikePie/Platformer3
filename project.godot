@@ -88,7 +88,7 @@ jump={
 [physics]
 
 2d/physics_engine="GodotPhysics2D"
-2d/default_gravity=1200.0
+2d/default_gravity=900.0
 
 [rendering]
 
