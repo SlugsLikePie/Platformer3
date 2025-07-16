@@ -55,10 +55,16 @@ enum State {
 	DASHING,
 	JUMPING,
 	WALLING,
-	FALLING
+	# FALLING
 }
 
-enum Walking_Substate { }
+enum Walking_Substate { 
+	GROUNDED,
+	JUMPING,
+	SLOW_FALLING,
+	PASSIVE_FALLING,
+	FAST_FALLING
+}
 
 enum Dashing_Substate {
 	UP,
@@ -79,12 +85,6 @@ enum Walling_Substate {
 	FAST_SLIDING,
 	CLIMBING,
 	JUMPING
-}
-
-enum Falling_Substate {
-	SLOW_FALLING,
-	PASSIVE_FALLING,
-	FAST_FALLING
 }
 
 # Physics vars
@@ -131,14 +131,13 @@ var is_sliding := false
 
 # State vars
 var state := State.IDLING
-# var walking_substate := Walking_Substate
+var walking_substate := Walking_Substate.GROUNDED
 #var dashing_substate := Dashing_Substate
 #var jumping_substate := Jumping_Substate
 var walling_substate := Walling_Substate.PASSIVE_SLIDING
-var falling_substate := Falling_Substate.PASSIVE_FALLING
 
-func _process(delta: float) -> void:
-	print(Engine.get_frames_per_second())
+# func _process(delta: float) -> void:
+	# print(Engine.get_frames_per_second())
 
 # MOVE USER INPUTS TO A _INPUT/_UNHANDLES_INPUT FUNC OR SOMETHING PROBABLY
 func get_inputs() -> void:
@@ -151,6 +150,43 @@ func get_inputs() -> void:
 	
 	is_grab_input_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 
+func apply_ground_walking(delta: float) -> void:
+	if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
+		if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta <= GROUND_MAX_SPEED:
+			velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
+		else:
+			velocity.x = GROUND_MAX_SPEED
+	elif velocity.x >= -GROUND_MAX_SPEED and lr_input_axis < -DEADBAND:
+		if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta >= -GROUND_MAX_SPEED:
+			velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
+		else:
+			velocity.x = -GROUND_MAX_SPEED
+	else:
+		if velocity.x > GROUND_ZERO_VELOCITY_THRESHOLD:
+			velocity.x -= GROUND_DECELERATION * delta
+		elif velocity.x < -GROUND_ZERO_VELOCITY_THRESHOLD:
+			velocity.x += GROUND_DECELERATION * delta
+		else:
+			velocity.x = 0
+
+func apply_air_walking(delta: float) -> void:
+	if velocity.x <= AIR_MAX_SPEED and lr_input_axis > DEADBAND:
+		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta <= AIR_MAX_SPEED:
+			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
+		else:
+			velocity.x = AIR_MAX_SPEED
+	elif velocity.x >= -AIR_MAX_SPEED and lr_input_axis < -DEADBAND:
+		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta >= -AIR_MAX_SPEED:
+			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
+		else:
+			velocity.x = -AIR_MAX_SPEED
+	else:
+		if velocity.x > AIR_ZERO_VELOCITY_THRESHOLD:
+			velocity.x -= AIR_DECELERATION * delta
+		elif velocity.x < -AIR_ZERO_VELOCITY_THRESHOLD:
+			velocity.x += AIR_DECELERATION * delta
+		else:
+			velocity.x = 0
 
 func _physics_process(delta: float) -> void:
 	velocity_updated.emit(delta, velocity)
@@ -173,7 +209,7 @@ func _physics_process(delta: float) -> void:
 			
 			
 			# State transition handling
-			if abs(lr_input_axis) > 0:
+			if abs(lr_input_axis) > 0 or not is_on_ground:
 				state = State.WALKING
 			
 			if is_dash_input_just_pressed:
@@ -184,35 +220,43 @@ func _physics_process(delta: float) -> void:
 			
 			if is_grab_input_pressed and can_wall:
 				state = State.WALLING
-			
-			if not is_on_ground:
-				state = State.FALLING
+
 			
 		State.WALKING:
 			print("WALKING")
 			# State handling
-			# NEED TO HANDLE (ONLY) GROUND WALKING HERE, AIR WALKING IS HANDLED IN FALLING
-			if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
-				if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta <= GROUND_MAX_SPEED:
-					velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
-				else:
-					velocity.x = GROUND_MAX_SPEED
-			elif velocity.x >= -GROUND_MAX_SPEED and lr_input_axis < -DEADBAND:
-				if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta >= -GROUND_MAX_SPEED:
-					velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
-				else:
-					velocity.x = -GROUND_MAX_SPEED
+			# Substate selection handling
+			if is_on_ground:
+				walking_substate = Walking_Substate.GROUNDED
 			else:
-				if velocity.x > GROUND_ZERO_VELOCITY_THRESHOLD:
-					velocity.x -= GROUND_DECELERATION * delta
-				elif velocity.x < -GROUND_ZERO_VELOCITY_THRESHOLD:
-					velocity.x += GROUND_DECELERATION * delta
-				else:
-					velocity.x = 0
-			
+				# IMPLEMENT FAST/SLOW FALLING HERE L8R
+				walking_substate = Walking_Substate.PASSIVE_FALLING
+
+			# Substate transition handling
+			match walking_substate:
+				Walking_Substate.GROUNDED:
+					print("GROUNDED")
+					apply_ground_walking(delta)
+				
+				Walking_Substate.JUMPING:
+					print("JUMPING")
+
+				Walking_Substate.SLOW_FALLING:
+					print("SLOW_FALLING")
+					apply_air_walking(delta)
+
+				Walking_Substate.PASSIVE_FALLING:
+					print("PASSIVE_FALLING")
+					velocity.y += gravity.y * delta
+					apply_air_walking(delta)
+
+				Walking_Substate.FAST_FALLING:
+					print("FAST_FALLING")
+					apply_air_walking(delta)
+					
 			
 			# State transition handling
-			if abs(lr_input_axis) == 0 and abs(velocity.x) == 0:
+			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
 				state = State.IDLING
 			
 			if is_dash_input_just_pressed:
@@ -254,22 +298,15 @@ func _physics_process(delta: float) -> void:
 			
 			
 			# State transition handling
-			if not (can_wall):
+			if not can_wall:
 				state = State.WALKING
 
-		State.FALLING:
-			print("FALLING")
-			# State handling
-			# NEED TO HANDLE AIR WALKING HERE
-			
-			
-			# State transition handling
-			if is_on_ground:
+			if not is_grab_input_pressed:
 				state = State.WALKING
 
-			if is_grab_input_pressed and can_wall:
-				state = State.WALLING
-	
+			if is_jump_input_pressed:
+				state = State.JUMPING
+
 	# TODO CASES PAST HERE MOSTLY, OLD CODE
 	
 	is_climbing = is_grab_input_pressed and (can_wall) 
@@ -318,10 +355,10 @@ func _physics_process(delta: float) -> void:
 		# Add gravity
 		if not is_on_floor():
 			# Normal gravity
-			if not is_on_left_wall and not is_on_right_wall:
-				velocity += gravity * delta
+			# if not is_on_left_wall and not is_on_right_wall:
+				# velocity += gravity * delta
 			# Sliding gravity
-			elif is_sliding:
+			if is_sliding:
 				if velocity.y + (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta <= SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET:
 					velocity.y += (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta
 				else:
@@ -348,8 +385,8 @@ func _physics_process(delta: float) -> void:
 					velocity.y = 0
 
 		# Apply left & right inputs:
-		if is_on_floor():
-			print("shugibald")
+		# if is_on_floor():
+		# 	print("shugibald")
 			# if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
 			# 	if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta <= GROUND_MAX_SPEED:
 			# 		velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
@@ -367,24 +404,24 @@ func _physics_process(delta: float) -> void:
 			# 		velocity.x += GROUND_DECELERATION * delta
 			# 	else:
 			# 		velocity.x = 0
-		else:
-			if velocity.x <= AIR_MAX_SPEED and lr_input_axis > DEADBAND:
-				if velocity.x + lr_input_axis * AIR_ACCELERATION * delta <= AIR_MAX_SPEED:
-					velocity.x += lr_input_axis * AIR_ACCELERATION * delta
-				else:
-					velocity.x = AIR_MAX_SPEED
-			elif velocity.x >= -AIR_MAX_SPEED and lr_input_axis < -DEADBAND:
-				if velocity.x + lr_input_axis * AIR_ACCELERATION * delta >= -AIR_MAX_SPEED:
-					velocity.x += lr_input_axis * AIR_ACCELERATION * delta
-				else:
-					velocity.x = -AIR_MAX_SPEED
-			else:
-				if velocity.x > AIR_ZERO_VELOCITY_THRESHOLD:
-					velocity.x -= AIR_DECELERATION * delta
-				elif velocity.x < -AIR_ZERO_VELOCITY_THRESHOLD:
-					velocity.x += AIR_DECELERATION * delta
-				else:
-					velocity.x = 0
+		# else:
+		# 	if velocity.x <= AIR_MAX_SPEED and lr_input_axis > DEADBAND:
+		# 		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta <= AIR_MAX_SPEED:
+		# 			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
+		# 		else:
+		# 			velocity.x = AIR_MAX_SPEED
+		# 	elif velocity.x >= -AIR_MAX_SPEED and lr_input_axis < -DEADBAND:
+		# 		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta >= -AIR_MAX_SPEED:
+		# 			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
+		# 		else:
+		# 			velocity.x = -AIR_MAX_SPEED
+		# 	else:
+		# 		if velocity.x > AIR_ZERO_VELOCITY_THRESHOLD:
+		# 			velocity.x -= AIR_DECELERATION * delta
+		# 		elif velocity.x < -AIR_ZERO_VELOCITY_THRESHOLD:
+		# 			velocity.x += AIR_DECELERATION * delta
+		# 		else:
+		# 			velocity.x = 0
 		# Add jumping # NEED TO REPLACE IS_ON_FLOOR W/ AREA CHECK AT SOME POINT # NEED TO ADD VARIABLE HEIGHT JUMPING
 		# NEED TO IMPLEMENT SUPERS/HYPERS? WHICH REQUIRES MODIFYING DASH (REWRITE TO NOT USE LERP AND TO ADD VELO INSTEAD OF SETTING)
 		if is_on_floor() or is_climbing or is_sliding:
