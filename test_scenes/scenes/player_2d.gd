@@ -106,7 +106,7 @@ var lr_input_axis := Input.get_axis("left", "right")
 var ud_input_axis := Input.get_axis("up", "down")
 
 # Dash vars
-var is_dash_input_just_pressed := Input.is_action_just_pressed("dash")
+var is_dash_just_pressed := Input.is_action_just_pressed("dash")
 var dashes := 1 # Change MAX_DASHES to increase number of dashes
 var can_dash = false
 var is_dashing := false
@@ -117,8 +117,10 @@ var dash_start_position := Vector2.ZERO
 var dash_end_position := Vector2.ZERO
 
 # Jump vars
-var is_jump_input_pressed := Input.is_action_pressed("jump")
-var is_jump_just_released = Input.is_action_just_released("jump")
+var is_jump_pressed := Input.is_action_pressed("jump")
+var is_jump_just_pressed := Input.is_action_just_pressed("jump")
+var is_jump_just_released := Input.is_action_just_released("jump")
+var has_jump_been_released := false
 var ground_jumps := MAX_GROUND_JUMPS
 var air_jumps := MAX_AIR_JUMPS
 var is_jumping := false
@@ -131,7 +133,7 @@ var jump_start_location := "ground"
 
 # Grab vars
 var is_grab_inverted := true
-var is_grab_input_pressed := (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
+var is_grab_pressed := (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 var can_wall := false
 var is_climbing := false
 var is_sliding := false
@@ -150,11 +152,11 @@ func get_inputs() -> void:
 	lr_input_axis = Input.get_axis("left", "right")
 	ud_input_axis = Input.get_axis("up", "down")
 
-	is_dash_input_just_pressed = Input.is_action_just_pressed("dash")
+	is_dash_just_pressed = Input.is_action_just_pressed("dash")
 
-	is_jump_input_pressed = Input.is_action_pressed("jump")
+	is_jump_pressed = Input.is_action_pressed("jump")
 	
-	is_grab_input_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
+	is_grab_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 
 func apply_ground_walking(delta: float) -> void:
 	if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
@@ -206,11 +208,12 @@ func _physics_process(delta: float) -> void:
 	gravity = get_gravity()
 
 	# Ability acquisition
-	can_dash = is_dash_input_just_pressed and not is_dashing and dashes > 0
+	can_dash = is_dash_just_pressed and not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
 	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
-	can_air_jump = air_jumps > 0
+	can_air_jump = air_jumps > 0 and not is_jumping
 	
+	print(air_jumps)
 	# Player state 	
 	match state:
 		State.IDLING:
@@ -222,13 +225,13 @@ func _physics_process(delta: float) -> void:
 			if abs(lr_input_axis) > 0 or not is_on_ground:
 				state = State.WALKING
 			
-			if is_grab_input_pressed and can_wall:
+			if is_grab_pressed and can_wall:
 				state = State.WALLING
 
-			if is_dash_input_just_pressed:
+			if is_dash_just_pressed:
 				state = State.DASHING
 			
-			if is_jump_input_pressed:
+			if is_jump_pressed:
 				state = State.JUMPING
 
 			if not is_on_ground:
@@ -245,13 +248,13 @@ func _physics_process(delta: float) -> void:
 			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
 				state = State.IDLING
 
-			if is_grab_input_pressed and can_wall:
+			if is_grab_pressed and can_wall:
 				state = State.WALLING
 			
-			if is_dash_input_just_pressed:
+			if is_dash_just_pressed:
 				state = State.DASHING
 			
-			if is_jump_input_pressed:
+			if is_jump_pressed:
 				state = State.JUMPING
 
 			if not is_on_ground:
@@ -263,10 +266,10 @@ func _physics_process(delta: float) -> void:
 			
 			
 			# State transition handling
-			if not can_wall or not is_grab_input_pressed:
+			if not can_wall or not is_grab_pressed:
 				state = State.WALKING
 
-			if is_jump_input_pressed:
+			if is_jump_pressed:
 				state = State.JUMPING
 			
 		State.DASHING:
@@ -291,10 +294,9 @@ func _physics_process(delta: float) -> void:
 				air_jumps = MAX_AIR_JUMPS
 
 			if can_ground_jump:
-				if is_jump_input_pressed:
+				if is_jump_pressed:
 					is_jumping = true
 					jump_timer = 0.0
-					print(MAX_AIR_JUMPS)
 			
 				# Substate selection
 				if is_on_ground:
@@ -309,19 +311,19 @@ func _physics_process(delta: float) -> void:
 					jumping_substate = Jumping_Substate.SLIDE_JUMPING
 					ground_jumps -= 1
 				
-				if Input.is_action_pressed("jump"):
-					is_jump_just_released = true
+			elif can_air_jump:
+				if is_jump_pressed:
+					is_jumping = true
+					jump_timer = 0.0
+				jumping_substate = Jumping_Substate.AIR_JUMPING
+				air_jumps -= 1
 
-			if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
+			if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_pressed:
 				jump_timer += delta
-				is_jump_just_released = false
 				match jumping_substate:
 					Jumping_Substate.GROUND_JUMPING:
-						# print("GROUND_JUMPING")
+						print("GROUND_JUMPING")
 						velocity.y = -GROUND_JUMP_SPEED
-
-						if is_jump_just_released:
-							print(1)
 
 					Jumping_Substate.CLIMB_JUMPING:
 						# print("CLIMB_JUMPING")
@@ -332,7 +334,7 @@ func _physics_process(delta: float) -> void:
 						velocity.y = -SLIDING_JUMP_VELOCITY.y
 					
 					Jumping_Substate.AIR_JUMPING:
-						# print("AIR_JUMPING")
+						print("AIR_JUMPING")
 						velocity.y = -AIR_JUMP_SPEED
 			else:
 				is_jumping = false
@@ -355,11 +357,14 @@ func _physics_process(delta: float) -> void:
 
 			if is_on_ground:
 				state = State.WALKING
+			
+			if is_jump_pressed:
+				state = State.JUMPING
 
 	# TODO CASES PAST HERE MOSTLY, OLD CODE
 	
-	is_climbing = is_grab_input_pressed and (can_wall) 
-	is_sliding = not is_grab_input_pressed and (can_wall)
+	is_climbing = is_grab_pressed and (can_wall) 
+	is_sliding = not is_grab_pressed and (can_wall)
 	
 	
 	# Add dashing
@@ -480,7 +485,7 @@ func _physics_process(delta: float) -> void:
 		# if Input.is_action_just_released("jump"):
 		# 	is_jump_just_released = true
 		
-		# if is_jump_input_pressed and ground_jumps > 0 and not is_jumping and (is_on_floor() or is_climbing or is_sliding):
+		# if is_jump_pressed and ground_jumps > 0 and not is_jumping and (is_on_floor() or is_climbing or is_sliding):
 		# 	if is_on_floor():
 		# 		jump_start_location = "ground"
 		# 		ground_jumps -= 1
@@ -494,13 +499,13 @@ func _physics_process(delta: float) -> void:
 		# 		ground_jumps -= 1
 		# 	jump_timer = 0.0
 		# 	is_jumping = true
-		# elif is_jump_input_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
+		# elif is_jump_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
 		# 	jump_start_location = "air"
 		# 	air_jumps -= 1
 		# 	jump_timer = 0.0
 		# 	is_jumping = true
 			
-		# if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_input_pressed:
+		# if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_pressed:
 		# 	jump_timer += delta
 		# 	is_jump_just_released = false
 		# 	if jump_start_location == "ground":

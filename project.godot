@@ -25,7 +25,6 @@ window/size/window_width_override=1440
 window/size/window_height_override=960
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
-window/vsync/vsync_mode=0
 
 [editor]
 
