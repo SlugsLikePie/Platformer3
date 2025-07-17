@@ -434,51 +434,6 @@ func _physics_process(delta: float) -> void:
 				else:
 					velocity.y = 0
 
-		# Add jumping # NEED TO REPLACE IS_ON_FLOOR W/ AREA CHECK AT SOME POINT # NEED TO ADD VARIABLE HEIGHT JUMPING
-		# NEED TO IMPLEMENT SUPERS/HYPERS? WHICH REQUIRES MODIFYING DASH (REWRITE TO NOT USE LERP AND TO ADD VELO INSTEAD OF SETTING)
-		# if is_on_floor() or is_climbing or is_sliding:
-		# 	ground_jumps = MAX_GROUND_JUMPS
-		# 	air_jumps = MAX_AIR_JUMPS
-		
-		# if Input.is_action_just_released("jump"):
-		# 	is_jump_just_released = true
-		
-		# if is_jump_pressed and ground_jumps > 0 and not is_jumping and (is_on_floor() or is_climbing or is_sliding):
-		# 	if is_on_floor():
-		# 		jump_start_location = "ground"
-		# 		ground_jumps -= 1
-		# 	elif is_climbing:
-		# 		if lr_input_axis == 0:
-		# 			jump_start_location = "climbing"
-		# 		ground_jumps -= 1
-		# 	elif is_sliding:
-		# 		if lr_input_axis == 0:
-		# 			jump_start_location = "sliding"
-		# 		ground_jumps -= 1
-		# 	jump_timer = 0.0
-		# 	is_jumping = true
-		# elif is_jump_pressed and air_jumps > 0 and not is_jumping and is_jump_just_released:
-		# 	jump_start_location = "air"
-		# 	air_jumps -= 1
-		# 	jump_timer = 0.0
-		# 	is_jumping = true
-			
-		# if is_jumping and clamp(jump_timer / JUMP_MAX_DURATION, 0, 1) < 1  and is_jump_pressed:
-		# 	jump_timer += delta
-		# 	is_jump_just_released = false
-		# 	if jump_start_location == "ground":
-		# 		velocity.y = -GROUND_JUMP_SPEED
-		# 	elif jump_start_location == "climbing":
-		# 		if lr_input_axis == 0:
-		# 			velocity.y = -CLIMBING_JUMP_VELOCITY.y
-		# 	elif jump_start_location == "sliding":
-		# 		if lr_input_axis == 0:
-		# 			velocity.y = -SLIDING_JUMP_VELOCITY.y
-		# 	elif jump_start_location == "air":
-		# 		velocity.y = -AIR_JUMP_SPEED
-		# else:
-		# 	is_jumping = false
-
 	move_and_slide()
 
 func _on_left_wall_detection_area_2d_body_entered(body: Node2D) -> void:
