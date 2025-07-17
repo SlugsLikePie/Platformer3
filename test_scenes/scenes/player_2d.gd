@@ -27,8 +27,10 @@ const CLIMB_ZERO_THRESHOLD := 150 / 2
 # REWORK PASSIVE AND ACTIVE TO HAVE SEPERATE UP/DOWN VARIABLES
 const SLIDE_PASSIVE_MAX_SPEED := 400 / 2
 const SLIDE_PASSIVE_ACCELERATION := 1000 / 2
-const SLIDE_ACTIVE_SPEED_OFFSET := 100 / 2
-const SLIDE_ACTIVE_ACCELERATION_OFFSET := 100 / 2
+const SLIDE_SLOW_MAX_SPEED := 300 / 2
+const SLIDE_SLOW_ACCELERATION := 1000 / 2
+const SLIDE_FAST_MAX_SPEED := 500 / 2
+const SLIDE_FAST_ACCELERATION := 1000 / 2
 
 # Dash consts
 const DASH_VELOCITY_SCALE = 1.9 * 2
@@ -228,7 +230,7 @@ func _physics_process(delta: float) -> void:
 			if abs(lr_input_axis) > 0 or not is_on_ground:
 				state = State.WALKING
 			
-			if is_grab_pressed and can_wall:
+			if can_wall:
 				state = State.WALLING
 
 			if is_dash_just_pressed:
@@ -249,7 +251,7 @@ func _physics_process(delta: float) -> void:
 			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
 				state = State.IDLING
 
-			if is_grab_pressed and can_wall:
+			if can_wall:
 				state = State.WALLING
 			
 			if is_dash_just_pressed:
@@ -264,22 +266,55 @@ func _physics_process(delta: float) -> void:
 		State.WALLING:
 			print("WALLING")
 			# State handling
+			if is_grab_pressed:
+				walling_substate = Walling_Substate.CLIMBING
+			
+			else:
+				if ud_input_axis > DEADBAND:
+					walling_substate = Walling_Substate.FAST_SLIDING
+				
+				elif ud_input_axis < -DEADBAND:
+					walling_substate = Walling_Substate.SLOW_SLIDING
+				
+				else:
+					walling_substate = Walling_Substate.PASSIVE_SLIDING
+
 			# PUT PLAYER INTO SLIDING STATE IF NOT GRAB PRESSED AND CAN WALL
 			match walling_substate:
 				Walling_Substate.SLOW_SLIDING:
 					print("SLOW_SLIDING")
+					velocity.y = SLIDE_SLOW_MAX_SPEED
 
 				Walling_Substate.PASSIVE_SLIDING:
 					print("PASSIVE_SLIDING")
+					velocity.y = SLIDE_PASSIVE_MAX_SPEED
 
 				Walling_Substate.FAST_SLIDING:
 					print("FAST_SLIDING")
+					velocity.y = SLIDE_FAST_MAX_SPEED
 
 				Walling_Substate.CLIMBING:
 					print("CLIMBING")
+					if velocity.y <= CLIMB_MAX_SPEED and ud_input_axis > DEADBAND:
+						if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta <= CLIMB_MAX_SPEED:
+							velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
+						else:
+							velocity.y = CLIMB_MAX_SPEED
+					elif velocity.y >= -CLIMB_MAX_SPEED and ud_input_axis < -DEADBAND:
+						if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta >= -CLIMB_MAX_SPEED:
+							velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
+						else:
+							velocity.y = -CLIMB_MAX_SPEED
+					else:
+						if velocity.y > CLIMB_ZERO_THRESHOLD:
+							velocity.y -= CLIMB_DECELERATION * delta
+						elif velocity.y < -CLIMB_ZERO_THRESHOLD:
+							velocity.y += CLIMB_DECELERATION * delta
+						else:
+							velocity.y = 0
 				
 			# State transition handling
-			if not can_wall or not is_grab_pressed: 
+			if not can_wall: 
 				state = State.WALKING
 			
 			if is_dash_just_pressed:
@@ -305,6 +340,7 @@ func _physics_process(delta: float) -> void:
 			# State handling
 			apply_air_walking(delta)
 
+			#  NEED TO ADD JUMP COOLDOWN SOMEWHERE
 			if can_ground_jump:
 				if is_jump_pressed:
 					is_jumping = true
@@ -320,7 +356,7 @@ func _physics_process(delta: float) -> void:
 					ground_jumps -= 1
 
 				elif is_sliding:
-					jumping_substate = Jumping_Substate.SLIDE_JUMPING
+					jumping_substate = Jumping_Substate.SLIDE_JUMPING # NEED TO ADD HORIZONTAL COMPONENT
 					ground_jumps -= 1
 				
 			elif can_air_jump:
@@ -369,10 +405,10 @@ func _physics_process(delta: float) -> void:
 			# State handling
 			apply_air_walking(delta) 
 
-			if ud_input_axis > 0:
+			if ud_input_axis > DEADBAND:
 				falling_substate = Falling_Substate.FAST_FALLING
 
-			elif ud_input_axis < 0:
+			elif ud_input_axis < -DEADBAND:
 				falling_substate = Falling_Substate.SLOW_FALLING
 			
 			else:
@@ -445,37 +481,12 @@ func _physics_process(delta: float) -> void:
 		elif lr_input_axis < -DEADBAND:
 			is_facing_right = false
 			
-		# Add GRAVITY
-		if not is_on_floor():
-			# Normal GRAVITY
-			# if not is_on_left_wall and not is_on_right_wall:
-				# velocity += GRAVITY * delta
 			# Sliding GRAVITY
-			if is_sliding:
-				if velocity.y + (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta <= SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET:
-					velocity.y += (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta
-				else:
-					velocity.y = SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET
-
-		# Add wall climbing
-		if is_climbing:
-			if velocity.y <= CLIMB_MAX_SPEED and ud_input_axis > DEADBAND:
-				if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta <= CLIMB_MAX_SPEED:
-					velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
-				else:
-					velocity.y = CLIMB_MAX_SPEED
-			elif velocity.y >= -CLIMB_MAX_SPEED and ud_input_axis < -DEADBAND:
-				if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta >= -CLIMB_MAX_SPEED:
-					velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
-				else:
-					velocity.y = -CLIMB_MAX_SPEED
-			else:
-				if velocity.y > CLIMB_ZERO_THRESHOLD:
-					velocity.y -= CLIMB_DECELERATION * delta
-				elif velocity.y < -CLIMB_ZERO_THRESHOLD:
-					velocity.y += CLIMB_DECELERATION * delta
-				else:
-					velocity.y = 0
+			# if is_sliding:
+			# 	if velocity.y + (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta <= SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET:
+			# 		velocity.y += (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta
+			# 	else:
+			# 		velocity.y = SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET
 
 	move_and_slide()
 
