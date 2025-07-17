@@ -120,7 +120,6 @@ var dash_end_position := Vector2.ZERO
 var is_jump_pressed := Input.is_action_pressed("jump")
 var is_jump_just_pressed := Input.is_action_just_pressed("jump")
 var is_jump_just_released := Input.is_action_just_released("jump")
-var has_jump_been_released := false
 var ground_jumps := MAX_GROUND_JUMPS
 var air_jumps := MAX_AIR_JUMPS
 var is_jumping := false
@@ -155,6 +154,7 @@ func get_inputs() -> void:
 	is_dash_just_pressed = Input.is_action_just_pressed("dash")
 
 	is_jump_pressed = Input.is_action_pressed("jump")
+	is_jump_just_pressed = Input.is_action_just_pressed("jump")
 	
 	is_grab_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 
@@ -213,6 +213,10 @@ func _physics_process(delta: float) -> void:
 	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
 	can_air_jump = air_jumps > 0 and not is_jumping
 	
+	if is_on_ground or is_climbing or is_sliding:
+			ground_jumps = MAX_GROUND_JUMPS
+			air_jumps = MAX_AIR_JUMPS
+	
 	print(air_jumps)
 	# Player state 	
 	match state:
@@ -237,7 +241,6 @@ func _physics_process(delta: float) -> void:
 			if not is_on_ground:
 				state = State.FALLING
 
-			
 		State.WALKING:
 			# print("WALKING")
 			# State handling
@@ -289,10 +292,6 @@ func _physics_process(delta: float) -> void:
 			# State handling
 			apply_air_walking(delta)
 
-			if is_on_ground or is_climbing or is_sliding:
-				ground_jumps = MAX_GROUND_JUMPS
-				air_jumps = MAX_AIR_JUMPS
-
 			if can_ground_jump:
 				if is_jump_pressed:
 					is_jumping = true
@@ -339,8 +338,6 @@ func _physics_process(delta: float) -> void:
 			else:
 				is_jumping = false
 
-
-
 			# State transition handling
 			if not is_jumping and is_on_ground:
 				state = State.WALKING
@@ -348,7 +345,6 @@ func _physics_process(delta: float) -> void:
 			if not is_jumping and not is_on_ground:
 				state = State.FALLING
 
-		
 		State.FALLING:
 			# print("FALLING")
 			# State handling // NEED TO IMPLEMENT SUBSTATES
@@ -438,44 +434,6 @@ func _physics_process(delta: float) -> void:
 				else:
 					velocity.y = 0
 
-		# Apply left & right inputs:
-		# if is_on_floor():
-		# 	print("shugibald")
-			# if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
-			# 	if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta <= GROUND_MAX_SPEED:
-			# 		velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
-			# 	else:
-			# 		velocity.x = GROUND_MAX_SPEED
-			# elif velocity.x >= -GROUND_MAX_SPEED and lr_input_axis < -DEADBAND:
-			# 	if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta >= -GROUND_MAX_SPEED:
-			# 		velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
-			# 	else:
-			# 		velocity.x = -GROUND_MAX_SPEED
-			# else:
-			# 	if velocity.x > GROUND_ZERO_VELOCITY_THRESHOLD:
-			# 		velocity.x -= GROUND_DECELERATION * delta
-			# 	elif velocity.x < -GROUND_ZERO_VELOCITY_THRESHOLD:
-			# 		velocity.x += GROUND_DECELERATION * delta
-			# 	else:
-			# 		velocity.x = 0
-		# else:
-		# 	if velocity.x <= AIR_MAX_SPEED and lr_input_axis > DEADBAND:
-		# 		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta <= AIR_MAX_SPEED:
-		# 			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
-		# 		else:
-		# 			velocity.x = AIR_MAX_SPEED
-		# 	elif velocity.x >= -AIR_MAX_SPEED and lr_input_axis < -DEADBAND:
-		# 		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta >= -AIR_MAX_SPEED:
-		# 			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
-		# 		else:
-		# 			velocity.x = -AIR_MAX_SPEED
-		# 	else:
-		# 		if velocity.x > AIR_ZERO_VELOCITY_THRESHOLD:
-		# 			velocity.x -= AIR_DECELERATION * delta
-		# 		elif velocity.x < -AIR_ZERO_VELOCITY_THRESHOLD:
-		# 			velocity.x += AIR_DECELERATION * delta
-		# 		else:
-		# 			velocity.x = 0
 		# Add jumping # NEED TO REPLACE IS_ON_FLOOR W/ AREA CHECK AT SOME POINT # NEED TO ADD VARIABLE HEIGHT JUMPING
 		# NEED TO IMPLEMENT SUPERS/HYPERS? WHICH REQUIRES MODIFYING DASH (REWRITE TO NOT USE LERP AND TO ADD VELO INSTEAD OF SETTING)
 		# if is_on_floor() or is_climbing or is_sliding:
