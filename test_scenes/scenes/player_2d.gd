@@ -24,6 +24,7 @@ const MAX_AIR_JUMPS := 1
 const CLIMB_ACCELERATION := 4000 / 2
 const CLIMB_DECELERATION := 10000 / 2
 const CLIMB_ZERO_THRESHOLD := 150 / 2
+# REWORK PASSIVE AND ACTIVE TO HAVE SEPERATE UP/DOWN VARIABLES
 const SLIDE_PASSIVE_MAX_SPEED := 400 / 2
 const SLIDE_PASSIVE_ACCELERATION := 1000 / 2
 const SLIDE_ACTIVE_SPEED_OFFSET := 100 / 2
@@ -48,6 +49,11 @@ const JUMP_MAX_DURATION := 0.1
 # Grab consts
 const GRAB_VELOCITY := 1 # UNUSED CURRENTLY
 
+# Falling consts
+const GRAVITY := 900.0
+const SLOW_FALLING_ACCELERATION := 100
+const FAST_FALLING_ACCELERATION := 200
+
 # Player state 
 enum State {
 	IDLING,
@@ -64,8 +70,7 @@ enum Walling_Substate {
 	SLOW_SLIDING,
 	PASSIVE_SLIDING,
 	FAST_SLIDING,
-	CLIMBING,
-	JUMPING
+	CLIMBING
 }
 
 enum Dashing_Substate {
@@ -91,9 +96,6 @@ enum Falling_Substate {
 	PASSIVE_FALLING,
 	FAST_FALLING
 }
-
-# Physics vars
-var gravity := Vector2(0, 0)
 
 # Environment info vars
 var is_on_ground := false
@@ -143,6 +145,7 @@ var walking_substate := Walking_Substate
 var walling_substate := Walling_Substate.PASSIVE_SLIDING
 var dashing_substate := Dashing_Substate
 var jumping_substate := Jumping_Substate.GROUND_JUMPING
+var falling_substate := Falling_Substate.PASSIVE_FALLING
 
 # func _process(delta: float) -> void:
 
@@ -204,9 +207,6 @@ func _physics_process(delta: float) -> void:
 	# HID acquisition
 	get_inputs()
 
-	# Physics configuration
-	gravity = get_gravity()
-
 	# Ability acquisition
 	can_dash = is_dash_just_pressed and not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
@@ -217,13 +217,12 @@ func _physics_process(delta: float) -> void:
 			ground_jumps = MAX_GROUND_JUMPS
 			air_jumps = MAX_AIR_JUMPS
 	
-	print(air_jumps)
 	# Player state 	
 	match state:
 		State.IDLING:
-			# print("IDLING")
+			print("IDLING")
 			# State handling
-			
+			# WOAH IT DOES NOTHING HERE (YET)
 			
 			# State transition handling
 			if abs(lr_input_axis) > 0 or not is_on_ground:
@@ -242,10 +241,9 @@ func _physics_process(delta: float) -> void:
 				state = State.FALLING
 
 		State.WALKING:
-			# print("WALKING")
+			print("WALKING")
 			# State handling
-			apply_ground_walking(delta)
-					
+			apply_ground_walking(delta)	
 			
 			# State transition handling
 			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
@@ -264,19 +262,34 @@ func _physics_process(delta: float) -> void:
 				state = State.FALLING
 
 		State.WALLING:
-			# print("WALLING")
+			print("WALLING")
 			# State handling
-			
-			
+			# PUT PLAYER INTO SLIDING STATE IF NOT GRAB PRESSED AND CAN WALL
+			match walling_substate:
+				Walling_Substate.SLOW_SLIDING:
+					print("SLOW_SLIDING")
+
+				Walling_Substate.PASSIVE_SLIDING:
+					print("PASSIVE_SLIDING")
+
+				Walling_Substate.FAST_SLIDING:
+					print("FAST_SLIDING")
+
+				Walling_Substate.CLIMBING:
+					print("CLIMBING")
+				
 			# State transition handling
-			if not can_wall or not is_grab_pressed:
+			if not can_wall or not is_grab_pressed: 
 				state = State.WALKING
+			
+			if is_dash_just_pressed:
+				state = State.DASHING
 
 			if is_jump_pressed:
 				state = State.JUMPING
 			
 		State.DASHING:
-			# print("DASHING")
+			print("DASHING")
 			# State handling
 			
 			
@@ -288,7 +301,7 @@ func _physics_process(delta: float) -> void:
 				state = State.WALLING
 
 		State.JUMPING:
-			# print("JUMPING")
+			print("JUMPING")
 			# State handling
 			apply_air_walking(delta)
 
@@ -321,7 +334,7 @@ func _physics_process(delta: float) -> void:
 				jump_timer += delta
 				match jumping_substate:
 					Jumping_Substate.GROUND_JUMPING:
-						print("GROUND_JUMPING")
+						# print("GROUND_JUMPING")
 						velocity.y = -GROUND_JUMP_SPEED
 
 					Jumping_Substate.CLIMB_JUMPING:
@@ -333,7 +346,7 @@ func _physics_process(delta: float) -> void:
 						velocity.y = -SLIDING_JUMP_VELOCITY.y
 					
 					Jumping_Substate.AIR_JUMPING:
-						print("AIR_JUMPING")
+						# print("AIR_JUMPING")
 						velocity.y = -AIR_JUMP_SPEED
 			else:
 				is_jumping = false
@@ -342,17 +355,47 @@ func _physics_process(delta: float) -> void:
 			if not is_jumping and is_on_ground:
 				state = State.WALKING
 
+			if is_grab_pressed and can_wall:
+				state = State.WALLING
+
+			if is_dash_just_pressed:
+				state = State.DASHING
+
 			if not is_jumping and not is_on_ground:
 				state = State.FALLING
 
 		State.FALLING:
-			# print("FALLING")
+			print("FALLING")
 			# State handling // NEED TO IMPLEMENT SUBSTATES
 			apply_air_walking(delta) 
-			velocity.y += gravity.y * delta
+
+			if ud_input_axis > 0:
+				falling_substate = Falling_Substate.FAST_FALLING
+
+			elif ud_input_axis < 0:
+				falling_substate = Falling_Substate.SLOW_FALLING
+			
+			else:
+				falling_substate = Falling_Substate.PASSIVE_FALLING
+
+			match falling_substate:
+				Falling_Substate.SLOW_FALLING:
+					print("SLOW_FALLING")
+					velocity.y += (GRAVITY - SLOW_FALLING_ACCELERATION) * delta
+				
+				Falling_Substate.PASSIVE_FALLING:
+					print("PASSIVE_FALLING")
+					velocity.y += GRAVITY * delta
+				
+				Falling_Substate.FAST_FALLING:
+					print("FAST_FALLING")
+					velocity.y += (GRAVITY + FAST_FALLING_ACCELERATION) * delta
 
 			if is_on_ground:
 				state = State.WALKING
+
+			if can_wall:
+				state = State.WALLING
 			
 			if is_jump_just_pressed:
 				state = State.JUMPING
@@ -402,12 +445,12 @@ func _physics_process(delta: float) -> void:
 		elif lr_input_axis < -DEADBAND:
 			is_facing_right = false
 			
-		# Add gravity
+		# Add GRAVITY
 		if not is_on_floor():
-			# Normal gravity
+			# Normal GRAVITY
 			# if not is_on_left_wall and not is_on_right_wall:
-				# velocity += gravity * delta
-			# Sliding gravity
+				# velocity += GRAVITY * delta
+			# Sliding GRAVITY
 			if is_sliding:
 				if velocity.y + (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta <= SLIDE_PASSIVE_MAX_SPEED + ud_input_axis * SLIDE_ACTIVE_SPEED_OFFSET:
 					velocity.y += (SLIDE_PASSIVE_ACCELERATION + SLIDE_ACTIVE_ACCELERATION_OFFSET * ud_input_axis) * delta
