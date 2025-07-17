@@ -366,7 +366,7 @@ func _physics_process(delta: float) -> void:
 
 		State.FALLING:
 			print("FALLING")
-			# State handling // NEED TO IMPLEMENT SUBSTATES
+			# State handling
 			apply_air_walking(delta) 
 
 			if ud_input_axis > 0:
