@@ -354,7 +354,7 @@ func _physics_process(delta: float) -> void:
 			if is_on_ground:
 				state = State.WALKING
 			
-			if is_jump_pressed:
+			if is_jump_just_pressed:
 				state = State.JUMPING
 
 	# TODO CASES PAST HERE MOSTLY, OLD CODE
