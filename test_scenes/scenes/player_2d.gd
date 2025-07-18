@@ -34,7 +34,7 @@ const SLIDE_FAST_ACCELERATION := 1000 / 2
 
 # Dash consts
 const DASH_VELOCITY_SCALE = 1.9 * 2
-const MAX_DASHES := 1
+const MAX_DASHES := 2
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
 const DASH_END_SPEED := 100.0
 const DASH_MAX_DURATION := 0.14 / 4 * DASH_VELOCITY_SCALE
@@ -164,6 +164,11 @@ func get_inputs() -> void:
 	is_grab_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 
 func apply_ground_walking(delta: float) -> void:
+	if lr_input_axis > DEADBAND:
+		is_facing_right = true
+	elif lr_input_axis < -DEADBAND:
+		is_facing_right = false
+
 	if velocity.x <= GROUND_MAX_SPEED and lr_input_axis > DEADBAND:
 		if velocity.x + lr_input_axis * GROUND_ACCELERATION * delta <= GROUND_MAX_SPEED:
 			velocity.x += lr_input_axis * GROUND_ACCELERATION * delta
@@ -183,6 +188,11 @@ func apply_ground_walking(delta: float) -> void:
 			velocity.x = 0
 
 func apply_air_walking(delta: float) -> void:
+	if lr_input_axis > DEADBAND:
+		is_facing_right = true
+	elif lr_input_axis < -DEADBAND:
+		is_facing_right = false
+
 	if velocity.x <= AIR_MAX_SPEED and lr_input_axis > DEADBAND:
 		if velocity.x + lr_input_axis * AIR_ACCELERATION * delta <= AIR_MAX_SPEED:
 			velocity.x += lr_input_axis * AIR_ACCELERATION * delta
@@ -214,11 +224,21 @@ func _physics_process(delta: float) -> void:
 	can_wall = is_on_left_wall or is_on_right_wall
 	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
 	can_air_jump = air_jumps > 0 and not is_jumping
+
+	# CHANGE TO BE BASED OFF OF CURRENT STATE, PROBABLY
+	is_climbing = is_grab_pressed and (can_wall) 
+	is_sliding = not is_grab_pressed and (can_wall)
 	
 	if is_on_ground or is_climbing or is_sliding:
 			ground_jumps = MAX_GROUND_JUMPS
 			air_jumps = MAX_AIR_JUMPS
-	
+
+	if is_on_ground and clamp(dash_cooldown_timer / DASH_COOLDOWN_DURATION, 0, 1) >= 1 and not is_dashing:
+		dashes = MAX_DASHES
+
+	if not is_dashing:
+		dash_cooldown_timer += delta
+
 	# Player state 	
 	match state:
 		State.IDLING:
@@ -266,6 +286,13 @@ func _physics_process(delta: float) -> void:
 		State.WALLING:
 			print("WALLING")
 			# State handling
+
+			#  IMPLEMENT SO THAT THE PLAYER IS FACING AWAY FROM THE WALL THEY ARE ON
+			# if lr_input_axis > DEADBAND:
+			# 	is_facing_right = true
+			# elif lr_input_axis < -DEADBAND:
+			# 	is_facing_right = false
+
 			if is_grab_pressed:
 				walling_substate = Walling_Substate.CLIMBING
 			
@@ -279,7 +306,6 @@ func _physics_process(delta: float) -> void:
 				else:
 					walling_substate = Walling_Substate.PASSIVE_SLIDING
 
-			# PUT PLAYER INTO SLIDING STATE IF NOT GRAB PRESSED AND CAN WALL
 			match walling_substate:
 				Walling_Substate.SLOW_SLIDING:
 					print("SLOW_SLIDING")
@@ -326,10 +352,33 @@ func _physics_process(delta: float) -> void:
 		State.DASHING:
 			print("DASHING")
 			# State handling
-			
+			# Starts dash
+			if can_dash:
+				dash_input_vector = Input.get_vector("left", "right", "up", "down")
+				dash_timer = 0.0
+				velocity = Vector2.ZERO
+				is_dashing = true
+				dashes -= 1
+
+			# Moves player through dash
+			if is_dashing:
+				dash_timer += delta
+				var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
+				if dash_input_vector != Vector2.ZERO:
+					velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+				else:
+					if is_facing_right:
+						velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+					else:
+						velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+				# Ends dash
+				if percent_complete >= 1:
+					dash_timer = 0
+					dash_cooldown_timer = 0
+					is_dashing = false
 			
 			# State transition handling
-			if is_on_ground or not is_dashing:
+			if is_on_ground and not is_dashing:
 				state = State.WALKING
 
 			if can_wall:
@@ -438,48 +487,47 @@ func _physics_process(delta: float) -> void:
 
 	# TODO CASES PAST HERE MOSTLY, OLD CODE
 	
-	is_climbing = is_grab_pressed and (can_wall) 
-	is_sliding = not is_grab_pressed and (can_wall)
-	
 	
 	# Add dashing
+	# --------------------- IMP
 	# Starts dash
-	if can_dash:
-		dash_input_vector = Input.get_vector("left", "right", "up", "down")
-		dash_timer = 0.0
-		velocity = Vector2.ZERO
-		is_dashing = true
-		dashes -= 1
+	# if can_dash:
+	# 	dash_input_vector = Input.get_vector("left", "right", "up", "down")
+	# 	dash_timer = 0.0
+	# 	velocity = Vector2.ZERO
+	# 	is_dashing = true
+	# 	dashes -= 1
 
-	# Moves player through dash
-	if is_dashing:
-		dash_timer += delta
-		var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
-		if dash_input_vector != Vector2.ZERO:
-			velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		else:
-			if is_facing_right:
-				velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-			else:
-				velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		# Ends dash
-		if percent_complete >= 1:
-			dash_timer = 0
-			dash_cooldown_timer = 0
-			is_dashing = false
+	# # Moves player through dash
+	# if is_dashing:
+	# 	dash_timer += delta
+	# 	var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
+	# 	if dash_input_vector != Vector2.ZERO:
+	# 		velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+	# 	else:
+	# 		if is_facing_right:
+	# 			velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+	# 		else:
+	# 			velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+	# 	# Ends dash
+	# 	if percent_complete >= 1:
+	# 		dash_timer = 0
+	# 		dash_cooldown_timer = 0
+	# 		is_dashing = false
+	# --------------------- /IMP
 
-	if is_on_floor() and clamp(dash_cooldown_timer / DASH_COOLDOWN_DURATION, 0, 1) >= 1 and not is_dashing:
-		dashes = MAX_DASHES
-	elif not is_dashing:
-		dash_cooldown_timer += delta
+	# if is_on_floor() and clamp(dash_cooldown_timer / DASH_COOLDOWN_DURATION, 0, 1) >= 1 and not is_dashing:
+	# 	dashes = MAX_DASHES
+	# if not is_dashing:
+	# 	dash_cooldown_timer += delta
 		
 	# Disables this block of code if the player is dashing or jumping to prevent other movements
-	if not is_dashing:
+	# if not is_dashing:
 		# Flips the direction the player is facing based off of user input
-		if lr_input_axis > DEADBAND:
-			is_facing_right = true
-		elif lr_input_axis < -DEADBAND:
-			is_facing_right = false
+		# if lr_input_axis > DEADBAND:
+		# 	is_facing_right = true
+		# elif lr_input_axis < -DEADBAND:
+		# 	is_facing_right = false
 			
 			# Sliding GRAVITY
 			# if is_sliding:
