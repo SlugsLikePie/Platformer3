@@ -151,7 +151,7 @@ var falling_substate := Falling_Substate.PASSIVE_FALLING
 
 # func _process(delta: float) -> void:
 
-# MOVE USER INPUTS TO A _INPUT/_UNHANDLES_INPUT FUNC OR SOMETHING PROBABLY
+# MOVE USER INPUTS TO A _INPUT/_UNHANDLED_INPUT FUNC OR SOMETHING PROBABLY
 func get_inputs() -> void:
 	lr_input_axis = Input.get_axis("left", "right")
 	ud_input_axis = Input.get_axis("up", "down")
@@ -394,7 +394,7 @@ func _physics_process(delta: float) -> void:
 			if not is_dashing:
 				state = State.WALKING
 
-			# Potential future super imp.
+			# POTENTIAL SUPER IMP.
 			# if is_dashing and is_jump_pressed:
 			# 	state = State.JUMPING
 			# 	velocity.x *= 2
@@ -506,7 +506,7 @@ func _physics_process(delta: float) -> void:
 			
 			if is_jump_just_pressed:
 				state = State.JUMPING
-				
+
 	move_and_slide()
 
 func _on_left_wall_detection_area_2d_body_entered(body: Node2D) -> void:
