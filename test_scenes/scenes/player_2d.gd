@@ -220,7 +220,8 @@ func _physics_process(delta: float) -> void:
 	get_inputs()
 
 	# Ability acquisition
-	can_dash = is_dash_just_pressed and not is_dashing and dashes > 0
+	# can_dash = is_dash_just_pressed and not is_dashing and dashes > 0 OLD
+	can_dash = not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
 	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
 	can_air_jump = air_jumps > 0 and not is_jumping
@@ -311,13 +312,22 @@ func _physics_process(delta: float) -> void:
 					print("SLOW_SLIDING")
 					velocity.y = SLIDE_SLOW_MAX_SPEED
 
+					if abs(lr_input_axis) > 0:
+						state = State.WALKING
+
 				Walling_Substate.PASSIVE_SLIDING:
 					print("PASSIVE_SLIDING")
 					velocity.y = SLIDE_PASSIVE_MAX_SPEED
+					
+					if abs(lr_input_axis) > 0:
+						state = State.WALKING
 
 				Walling_Substate.FAST_SLIDING:
 					print("FAST_SLIDING")
 					velocity.y = SLIDE_FAST_MAX_SPEED
+
+					if abs(lr_input_axis) > 0:
+						state = State.WALKING					
 
 				Walling_Substate.CLIMBING:
 					print("CLIMBING")
@@ -350,7 +360,7 @@ func _physics_process(delta: float) -> void:
 				state = State.JUMPING
 			
 		State.DASHING:
-			print("DASHING")
+			print("DASHING") # DASH TIMER IMPLEMENTATION SEEMS BROKEN
 			# State handling
 			# Starts dash
 			if can_dash:
@@ -378,7 +388,10 @@ func _physics_process(delta: float) -> void:
 					is_dashing = false
 			
 			# State transition handling
-			if is_on_ground and not is_dashing:
+			# if is_on_ground and not is_dashing: OLD
+			# 	state = State.WALKING
+
+			if not is_dashing:
 				state = State.WALKING
 
 			if can_wall:
@@ -481,6 +494,9 @@ func _physics_process(delta: float) -> void:
 
 			if can_wall:
 				state = State.WALLING
+
+			if is_dash_just_pressed:
+				state = State.DASHING
 			
 			if is_jump_just_pressed:
 				state = State.JUMPING
