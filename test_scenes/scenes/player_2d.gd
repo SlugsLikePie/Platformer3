@@ -211,6 +211,23 @@ func apply_air_walking(delta: float) -> void:
 		else:
 			velocity.x = 0
 
+func apply_dash(delta: float, percent_complete: float, direction: Vector2):
+	# if is_dashing:
+		dash_timer += delta
+		# var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
+		if dash_input_vector != Vector2.ZERO:
+			velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+		else:
+			if is_facing_right:
+				velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+			else:
+				velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+		# # Ends dash
+		# if percent_complete >= 1:
+		# 	dash_timer = 0
+		# 	dash_cooldown_timer = 0
+		# 	is_dashing = false	
+
 func _physics_process(delta: float) -> void:
 	# Signals emit
 	velocity_updated.emit(delta, velocity)
@@ -296,16 +313,15 @@ func _physics_process(delta: float) -> void:
 
 			if is_grab_pressed:
 				walling_substate = Walling_Substate.CLIMBING
+
+			elif ud_input_axis > DEADBAND:
+				walling_substate = Walling_Substate.FAST_SLIDING
+			
+			elif ud_input_axis < -DEADBAND:
+				walling_substate = Walling_Substate.SLOW_SLIDING
 			
 			else:
-				if ud_input_axis > DEADBAND:
-					walling_substate = Walling_Substate.FAST_SLIDING
-				
-				elif ud_input_axis < -DEADBAND:
-					walling_substate = Walling_Substate.SLOW_SLIDING
-				
-				else:
-					walling_substate = Walling_Substate.PASSIVE_SLIDING
+				walling_substate = Walling_Substate.PASSIVE_SLIDING
 
 			match walling_substate:
 				Walling_Substate.SLOW_SLIDING:
@@ -370,23 +386,16 @@ func _physics_process(delta: float) -> void:
 				is_dashing = true
 				dashes -= 1
 
+			var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
+
 			# Moves player through dash
 			if is_dashing:
-				dash_timer += delta
-				var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
-				if dash_input_vector != Vector2.ZERO:
-					velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-				else:
-					if is_facing_right:
-						velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-					else:
-						velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-				# Ends dash
-				if percent_complete >= 1:
-					dash_timer = 0
-					dash_cooldown_timer = 0
-					is_dashing = false
+				apply_dash(delta, percent_complete, Vector2.RIGHT)
 			
+			if percent_complete >= 1:
+				dash_timer = 0
+				dash_cooldown_timer = 0
+				is_dashing = false	
 			# State transition handling
 			# if is_on_ground and not is_dashing: OLD
 			# 	state = State.WALKING
