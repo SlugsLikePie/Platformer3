@@ -1,0 +1,57 @@
+[gd_scene load_steps=7 format=3 uid="uid://4u01xfrxsl1p"]
+
+[ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://all_scenes/test_scenes/scenes/player_2d.gd" id="1_mukur"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_u8lj1"]
+size = Vector2(8, 16)
+
+[sub_resource type="CanvasTexture" id="CanvasTexture_7vfq7"]
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_6r7w4"]
+a = Vector2(0, -8)
+b = Vector2(0, 8)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_ftsyd"]
+a = Vector2(0, -8)
+b = Vector2(0, 8)
+
+[sub_resource type="SegmentShape2D" id="SegmentShape2D_4vxke"]
+a = Vector2(3, 0)
+b = Vector2(-5, 0)
+
+[node name="Player2D" type="CharacterBody2D"]
+script = ExtResource("1_mukur")
+
+[node name="PlayerCollision2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_u8lj1")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(-4, -8)
+scale = Vector2(8, 16)
+texture = SubResource("CanvasTexture_7vfq7")
+
+[node name="LeftWallDetectionArea2D" type="Area2D" parent="."]
+position = Vector2(-4.4, 0)
+
+[node name="LeftWallDetectionCollisionShape2D" type="CollisionShape2D" parent="LeftWallDetectionArea2D"]
+shape = SubResource("SegmentShape2D_6r7w4")
+
+[node name="RightWallDetectionArea2D" type="Area2D" parent="."]
+position = Vector2(4.4, 0)
+
+[node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="RightWallDetectionArea2D"]
+shape = SubResource("SegmentShape2D_ftsyd")
+
+[node name="GroundDetectionArea2D" type="Area2D" parent="."]
+position = Vector2(0, 8.4)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GroundDetectionArea2D"]
+position = Vector2(1, 0)
+shape = SubResource("SegmentShape2D_4vxke")
+
+[connection signal="body_entered" from="LeftWallDetectionArea2D" to="." method="_on_left_wall_detection_area_2d_body_entered"]
+[connection signal="body_exited" from="LeftWallDetectionArea2D" to="." method="_on_left_wall_detection_area_2d_body_exited"]
+[connection signal="body_entered" from="RightWallDetectionArea2D" to="." method="_on_right_wall_detection_area_2d_body_entered"]
+[connection signal="body_exited" from="RightWallDetectionArea2D" to="." method="_on_right_wall_detection_area_2d_body_exited"]
+[connection signal="body_entered" from="GroundDetectionArea2D" to="." method="_on_ground_detection_area_2d_body_entered"]
+[connection signal="body_exited" from="GroundDetectionArea2D" to="." method="_on_ground_detection_area_2d_body_exited"]

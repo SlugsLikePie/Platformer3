@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxfje6t22yg3f"
-path="res://.godot/imported/test_scene_foreground_tileset.png-24e17392b49eb5683dce1057a9ed6276.ctex"
+uid="uid://dflpasibe75w4"
+path="res://.godot/imported/test_scene.svg-01a122f410779e0ed7628d451a8ddccd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://test_scenes/art/game_art/test_scene_foreground_tileset.png"
-dest_files=["res://.godot/imported/test_scene_foreground_tileset.png-24e17392b49eb5683dce1057a9ed6276.ctex"]
+source_file="res://all_scenes/test_scenes/art/original_art/test_scene.svg"
+dest_files=["res://.godot/imported/test_scene.svg-01a122f410779e0ed7628d451a8ddccd.ctex"]
 
 [params]
 
@@ -32,3 +32,6 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
+svg/scale=1.0
+editor/scale_with_editor_scale=false
+editor/convert_colors_with_editor_theme=false

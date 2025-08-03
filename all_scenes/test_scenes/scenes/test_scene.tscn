@@ -1,11 +1,11 @@
 [gd_scene load_steps=19 format=4 uid="uid://bckrbscq7i46c"]
 
-[ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://test_scenes/scenes/player_2d.gd" id="1_2ugl5"]
-[ext_resource type="Script" uid="uid://dkgvd5u54irye" path="res://test_scenes/scenes/player_camera_2d.gd" id="2_rrv6s"]
-[ext_resource type="Script" uid="uid://dsnyquodhwsd2" path="res://test_scenes/scenes/rich_text_label.gd" id="3_kymn1"]
-[ext_resource type="Texture2D" uid="uid://50eupvcnw52e" path="res://test_scenes/art/game_art/test_scene_midground_tileset.png" id="4_5u3au"]
-[ext_resource type="Texture2D" uid="uid://bmshjl7yi27hx" path="res://test_scenes/art/game_art/test_scene_background_tileset.png" id="4_s8q2u"]
-[ext_resource type="Texture2D" uid="uid://cxfje6t22yg3f" path="res://test_scenes/art/game_art/test_scene_foreground_tileset.png" id="6_3ym4i"]
+[ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://all_scenes/test_scenes/scenes/player_2d.gd" id="1_2ugl5"]
+[ext_resource type="Script" uid="uid://dkgvd5u54irye" path="res://all_scenes/test_scenes/scenes/player_camera_2d.gd" id="2_rrv6s"]
+[ext_resource type="Script" uid="uid://dsnyquodhwsd2" path="res://all_scenes/test_scenes/scenes/rich_text_label.gd" id="3_kymn1"]
+[ext_resource type="Texture2D" uid="uid://50eupvcnw52e" path="res://all_scenes/test_scenes/art/game_art/test_scene_midground_tileset.png" id="4_5u3au"]
+[ext_resource type="Texture2D" uid="uid://bmshjl7yi27hx" path="res://all_scenes/test_scenes/art/game_art/test_scene_background_tileset.png" id="4_s8q2u"]
+[ext_resource type="Texture2D" uid="uid://cxfje6t22yg3f" path="res://all_scenes/test_scenes/art/game_art/test_scene_foreground_tileset.png" id="6_3ym4i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_54n8g"]
 size = Vector2(8, 16)
