@@ -1,9 +1,10 @@
-[gd_scene load_steps=12 format=3 uid="uid://g72f60bs1xet"]
+[gd_scene load_steps=13 format=3 uid="uid://g72f60bs1xet"]
 
 [ext_resource type="Texture2D" uid="uid://bmshjl7yi27hx" path="res://all_scenes/test_scenes/art/game_art/test_scene_background_tileset.png" id="1_nd3oa"]
 [ext_resource type="Texture2D" uid="uid://50eupvcnw52e" path="res://all_scenes/test_scenes/art/game_art/test_scene_midground_tileset.png" id="2_faj7k"]
 [ext_resource type="Texture2D" uid="uid://cxfje6t22yg3f" path="res://all_scenes/test_scenes/art/game_art/test_scene_foreground_tileset.png" id="3_qtabb"]
 [ext_resource type="PackedScene" uid="uid://bom1esseecr07" path="res://characters/cameras/stationary_camera.tscn" id="4_faj7k"]
+[ext_resource type="PackedScene" uid="uid://bruoor6ydjtcs" path="res://utilities/scene_switcher.tscn" id="5_qtabb"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wupwm"]
 texture = ExtResource("1_nd3oa")
@@ -149,3 +150,5 @@ shape = SubResource("WorldBoundaryShape2D_wmywy")
 shape = SubResource("WorldBoundaryShape2D_wmywy")
 
 [node name="StationaryCamera" parent="." instance=ExtResource("4_faj7k")]
+
+[node name="SceneSwitcher" parent="." instance=ExtResource("5_qtabb")]
