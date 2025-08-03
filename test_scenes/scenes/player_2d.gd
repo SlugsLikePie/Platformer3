@@ -214,19 +214,26 @@ func apply_air_walking(delta: float) -> void:
 func apply_dash(delta: float, percent_complete: float, direction: Vector2):
 	# if is_dashing:
 		dash_timer += delta
+		
+		velocity = direction * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
 		# var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
-		if dash_input_vector != Vector2.ZERO:
-			velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		else:
-			if is_facing_right:
-				velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-			else:
-				velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+		# if dash_input_vector != Vector2.ZERO:
+		# 	velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+		# else:
+		# 	if is_facing_right:
+		# 		velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
+		# 	else:
+		# 		velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
 		# # Ends dash
 		# if percent_complete >= 1:
 		# 	dash_timer = 0
 		# 	dash_cooldown_timer = 0
 		# 	is_dashing = false	
+
+func exit_dash():
+	dash_timer = 0.0
+	dash_cooldown_timer = 0
+	is_dashing = false
 
 func _physics_process(delta: float) -> void:
 	# Signals emit
@@ -237,7 +244,6 @@ func _physics_process(delta: float) -> void:
 	get_inputs()
 
 	# Ability acquisition
-	# can_dash = is_dash_just_pressed and not is_dashing and dashes > 0 OLD
 	can_dash = not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
 	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
@@ -257,10 +263,12 @@ func _physics_process(delta: float) -> void:
 	if not is_dashing:
 		dash_cooldown_timer += delta
 
+	print(dash_timer)
+
 	# Player state 	
 	match state:
 		State.IDLING:
-			print("IDLING")
+			# print("IDLING")
 			# State handling
 			# WOAH IT DOES NOTHING HERE (YET)
 			
@@ -281,7 +289,7 @@ func _physics_process(delta: float) -> void:
 				state = State.FALLING
 
 		State.WALKING:
-			print("WALKING")
+			# print("WALKING")
 			# State handling
 			apply_ground_walking(delta)	
 			
@@ -302,7 +310,7 @@ func _physics_process(delta: float) -> void:
 				state = State.FALLING
 
 		State.WALLING:
-			print("WALLING")
+			# print("WALLING")
 			# State handling
 
 			#  IMPLEMENT SO THAT THE PLAYER IS FACING AWAY FROM THE WALL THEY ARE ON
@@ -376,7 +384,7 @@ func _physics_process(delta: float) -> void:
 				state = State.JUMPING
 			
 		State.DASHING:
-			print("DASHING") # DASH TIMER IMPLEMENTATION SEEMS BROKEN
+			print("DASHING")
 			# State handling
 			# Starts dash
 			if can_dash:
@@ -388,14 +396,14 @@ func _physics_process(delta: float) -> void:
 
 			var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
 
-			# Moves player through dash
+			print(percent_complete)
+
+			# Moves player through dash # PUT STATE MACHINE IMP. HERE, WHERE THE STATE IS PASSED INTO THE METHOD CALL
 			if is_dashing:
 				apply_dash(delta, percent_complete, Vector2.RIGHT)
 			
 			if percent_complete >= 1:
-				dash_timer = 0
-				dash_cooldown_timer = 0
-				is_dashing = false	
+				exit_dash()	
 			# State transition handling
 			# if is_on_ground and not is_dashing: OLD
 			# 	state = State.WALKING
@@ -409,10 +417,11 @@ func _physics_process(delta: float) -> void:
 			# 	velocity.x *= 2
 
 			if can_wall:
+				exit_dash()
 				state = State.WALLING
 
 		State.JUMPING:
-			print("JUMPING")
+			# print("JUMPING")
 			# State handling
 			apply_air_walking(delta)
 
@@ -470,7 +479,7 @@ func _physics_process(delta: float) -> void:
 			if not is_jumping and is_grab_pressed and can_wall:
 				state = State.WALLING
 				
-			if is_dash_just_pressed:
+			if is_dash_just_pressed: # NOT WORKING FOR SOME REASON
 				state = State.DASHING
 				is_jumping = false
 
@@ -478,7 +487,7 @@ func _physics_process(delta: float) -> void:
 				state = State.FALLING
 
 		State.FALLING:
-			print("FALLING")
+			# print("FALLING")
 			# State handling
 			apply_air_walking(delta) 
 
@@ -493,15 +502,15 @@ func _physics_process(delta: float) -> void:
 
 			match falling_substate:
 				Falling_Substate.SLOW_FALLING:
-					print("SLOW_FALLING")
+					# print("SLOW_FALLING")
 					velocity.y += (GRAVITY - SLOW_FALLING_ACCELERATION) * delta
 				
 				Falling_Substate.PASSIVE_FALLING:
-					print("PASSIVE_FALLING")
+					# print("PASSIVE_FALLING")
 					velocity.y += GRAVITY * delta
 				
 				Falling_Substate.FAST_FALLING:
-					print("FAST_FALLING")
+					# print("FAST_FALLING")
 					velocity.y += (GRAVITY + FAST_FALLING_ACCELERATION) * delta
 
 			if is_on_ground:
