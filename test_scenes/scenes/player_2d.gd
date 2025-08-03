@@ -20,7 +20,7 @@ const AIR_ZERO_VELOCITY_THRESHOLD := GROUND_ZERO_VELOCITY_THRESHOLD
 # ud movement consts
 const CLIMB_MAX_SPEED := 200
 const MAX_GROUND_JUMPS := 1
-const MAX_AIR_JUMPS := 1
+const MAX_AIR_JUMPS := 0
 const CLIMB_ACCELERATION := 4000 / 2
 const CLIMB_DECELERATION := 10000 / 2
 const CLIMB_ZERO_THRESHOLD := 150 / 2
@@ -33,7 +33,7 @@ const SLIDE_FAST_MAX_SPEED := 500 / 2
 const SLIDE_FAST_ACCELERATION := 1000 / 2
 
 # Dash consts
-const DASH_VELOCITY_SCALE = 3.8
+const DASH_VELOCITY_SCALE = 3.8 * 1.5
 const MAX_DASHES := 2
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
 const DASH_END_SPEED := 100.0
@@ -47,7 +47,7 @@ const CLIMBING_JUMP_VELOCITY := Vector2(200, 500) / 2
 const SLIDING_JUMP_VELOCITY := Vector2(200, 100) / 2
 const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY PROBABLY DELETE
 const JUMP_MAX_DURATION := 0.1
-const GROUND_JUMP_COOLDOWN_DURATION := 0.2
+const GROUND_AND_WALL_JUMP_COOLDOWN_DURATION := 0.2
 const AIR_JUMP_COOLDOWN_DURATION := 0.2
 
 # Grab consts
@@ -133,7 +133,7 @@ var is_jumping := false
 var can_ground_jump := false
 var can_air_jump := false
 var jump_timer := 0.0
-var ground_jump_cooldown_timer := 0.0
+var ground_and_wall_jump_cooldown_timer := 0.0
 var air_jump_cooldown_timer := 0.0
 
 # Grab vars
@@ -250,7 +250,7 @@ func exit_dash():
 	is_dashing = false
 
 func _physics_process(delta: float) -> void:
-	print("ground", ground_jump_cooldown_timer)
+	print("ground", ground_and_wall_jump_cooldown_timer)
 	print("air", air_jump_cooldown_timer)
 	# Signals emit
 	velocity_updated.emit(delta, velocity)
@@ -262,12 +262,12 @@ func _physics_process(delta: float) -> void:
 	# Ability acquisition
 	can_dash = not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
-	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall) and clamp(ground_jump_cooldown_timer / GROUND_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
-	can_air_jump = air_jumps > 0 and not is_jumping and clamp(air_jump_cooldown_timer / AIR_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
+	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall) and clamp(ground_and_wall_jump_cooldown_timer / GROUND_AND_WALL_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
+	can_air_jump = not can_ground_jump and air_jumps > 0 and not is_jumping and clamp(air_jump_cooldown_timer / AIR_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
 
 	# CHANGE TO BE BASED OFF OF CURRENT STATE, PROBABLY
-	is_climbing = is_grab_pressed and (can_wall) 
-	is_sliding = not is_grab_pressed and (can_wall)
+	is_climbing = is_grab_pressed and can_wall
+	is_sliding = not is_grab_pressed and can_wall
 	
 	if is_on_ground or is_climbing or is_sliding:
 			ground_jumps = MAX_GROUND_JUMPS
@@ -280,8 +280,8 @@ func _physics_process(delta: float) -> void:
 	if not is_dashing:
 		dash_cooldown_timer += delta
 
-	if not is_jumping and is_on_ground:
-		ground_jump_cooldown_timer += delta
+	if not is_jumping and is_on_ground or is_on_left_wall or can_wall:
+		ground_and_wall_jump_cooldown_timer += delta
 	
 	if not is_jumping and not is_on_ground:
 		air_jump_cooldown_timer += delta
@@ -507,17 +507,17 @@ func _physics_process(delta: float) -> void:
 					Jumping_Substate.GROUND_JUMPING:
 						# print("GROUND_JUMPING")
 						velocity.y = -GROUND_JUMP_SPEED
-						ground_jump_cooldown_timer = 0
+						ground_and_wall_jump_cooldown_timer = 0
 
 					Jumping_Substate.CLIMB_JUMPING:
 						# print("CLIMB_JUMPING")
 						velocity.y = -CLIMBING_JUMP_VELOCITY.y
-						ground_jump_cooldown_timer = 0
+						ground_and_wall_jump_cooldown_timer = 0
 
 					Jumping_Substate.SLIDE_JUMPING:
 						# print("SLIDE_JUMPING")
 						velocity.y = -SLIDING_JUMP_VELOCITY.y
-						ground_jump_cooldown_timer = 0
+						ground_and_wall_jump_cooldown_timer = 0
 					
 					Jumping_Substate.AIR_JUMPING:
 						# print("AIR_JUMPING")
