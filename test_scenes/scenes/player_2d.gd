@@ -47,6 +47,8 @@ const CLIMBING_JUMP_VELOCITY := Vector2(200, 500) / 2
 const SLIDING_JUMP_VELOCITY := Vector2(200, 100) / 2
 const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY PROBABLY DELETE
 const JUMP_MAX_DURATION := 0.1
+const GROUND_JUMP_COOLDOWN_DURATION := 0.2
+const AIR_JUMP_COOLDOWN_DURATION := 0.2
 
 # Grab consts
 const GRAB_VELOCITY := 1 # UNUSED CURRENTLY
@@ -133,7 +135,6 @@ var can_air_jump := false
 var jump_timer := 0.0
 var ground_jump_cooldown_timer := 0.0
 var air_jump_cooldown_timer := 0.0
-var jump_start_location := "ground"
 
 # Grab vars
 var is_grab_inverted := true
@@ -249,6 +250,8 @@ func exit_dash():
 	is_dashing = false
 
 func _physics_process(delta: float) -> void:
+	print("ground", ground_jump_cooldown_timer)
+	print("air", air_jump_cooldown_timer)
 	# Signals emit
 	velocity_updated.emit(delta, velocity)
 	position_updated.emit(delta, position)
@@ -259,8 +262,8 @@ func _physics_process(delta: float) -> void:
 	# Ability acquisition
 	can_dash = not is_dashing and dashes > 0
 	can_wall = is_on_left_wall or is_on_right_wall
-	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall)
-	can_air_jump = air_jumps > 0 and not is_jumping
+	can_ground_jump = ground_jumps > 0 and not is_jumping and (is_on_ground or can_wall) and clamp(ground_jump_cooldown_timer / GROUND_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
+	can_air_jump = air_jumps > 0 and not is_jumping and clamp(air_jump_cooldown_timer / AIR_JUMP_COOLDOWN_DURATION, 0, 1) >= 1
 
 	# CHANGE TO BE BASED OFF OF CURRENT STATE, PROBABLY
 	is_climbing = is_grab_pressed and (can_wall) 
@@ -273,8 +276,15 @@ func _physics_process(delta: float) -> void:
 	if is_on_ground and clamp(dash_cooldown_timer / DASH_COOLDOWN_DURATION, 0, 1) >= 1 and not is_dashing:
 		dashes = MAX_DASHES
 
+	# Increase cooldown timers
 	if not is_dashing:
 		dash_cooldown_timer += delta
+
+	if not is_jumping and is_on_ground:
+		ground_jump_cooldown_timer += delta
+	
+	if not is_jumping and not is_on_ground:
+		air_jump_cooldown_timer += delta
 
 	# Player state 	
 	match state:
@@ -497,18 +507,22 @@ func _physics_process(delta: float) -> void:
 					Jumping_Substate.GROUND_JUMPING:
 						# print("GROUND_JUMPING")
 						velocity.y = -GROUND_JUMP_SPEED
+						ground_jump_cooldown_timer = 0
 
 					Jumping_Substate.CLIMB_JUMPING:
 						# print("CLIMB_JUMPING")
 						velocity.y = -CLIMBING_JUMP_VELOCITY.y
+						ground_jump_cooldown_timer = 0
 
 					Jumping_Substate.SLIDE_JUMPING:
 						# print("SLIDE_JUMPING")
 						velocity.y = -SLIDING_JUMP_VELOCITY.y
+						ground_jump_cooldown_timer = 0
 					
 					Jumping_Substate.AIR_JUMPING:
 						# print("AIR_JUMPING")
 						velocity.y = -AIR_JUMP_SPEED
+						air_jump_cooldown_timer = 0
 			else:
 				is_jumping = false
 
