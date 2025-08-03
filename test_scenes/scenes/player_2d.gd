@@ -24,7 +24,7 @@ const MAX_AIR_JUMPS := 1
 const CLIMB_ACCELERATION := 4000 / 2
 const CLIMB_DECELERATION := 10000 / 2
 const CLIMB_ZERO_THRESHOLD := 150 / 2
-# REWORK PASSIVE AND ACTIVE TO HAVE SEPERATE UP/DOWN VARIABLES
+# REWORK PASSIVE AND ACTIVE TO HAVE SEPERATE UP/DOWN VARIABLES MAYBE
 const SLIDE_PASSIVE_MAX_SPEED := 400 / 2
 const SLIDE_PASSIVE_ACCELERATION := 1000 / 2
 const SLIDE_SLOW_MAX_SPEED := 300 / 2
@@ -33,7 +33,7 @@ const SLIDE_FAST_MAX_SPEED := 500 / 2
 const SLIDE_FAST_ACCELERATION := 1000 / 2
 
 # Dash consts
-const DASH_VELOCITY_SCALE = 1.9 * 2
+const DASH_VELOCITY_SCALE = 3.8
 const MAX_DASHES := 2
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
 const DASH_END_SPEED := 100.0
@@ -117,6 +117,7 @@ var is_dashing := false
 var dash_timer := 0.0
 var dash_cooldown_timer := 0.0
 var dash_input_vector := Vector2.ZERO
+var dash_vector := Vector2.ZERO
 var dash_start_position := Vector2.ZERO
 var dash_end_position := Vector2.ZERO
 
@@ -145,7 +146,7 @@ var is_sliding := false
 var state := State.IDLING
 var walking_substate := Walking_Substate
 var walling_substate := Walling_Substate.PASSIVE_SLIDING
-var dashing_substate := Dashing_Substate
+var dashing_substate := Dashing_Substate.UP
 var jumping_substate := Jumping_Substate.GROUND_JUMPING
 var falling_substate := Falling_Substate.PASSIVE_FALLING
 
@@ -211,24 +212,36 @@ func apply_air_walking(delta: float) -> void:
 		else:
 			velocity.x = 0
 
-func apply_dash(delta: float, percent_complete: float, direction: Vector2):
+func apply_dashing(delta: float, percent_complete: float):
 	# if is_dashing:
 		dash_timer += delta
 		
-		velocity = direction * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		# var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
-		# if dash_input_vector != Vector2.ZERO:
-		# 	velocity = dash_input_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		# else:
-		# 	if is_facing_right:
-		# 		velocity = Vector2.RIGHT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		# 	else:
-		# 		velocity = Vector2.LEFT * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
-		# # Ends dash
-		# if percent_complete >= 1:
-		# 	dash_timer = 0
-		# 	dash_cooldown_timer = 0
-		# 	is_dashing = false	
+		match dashing_substate:
+			Dashing_Substate.UP:
+				dash_vector = Vector2.UP
+			
+			Dashing_Substate.UP_RIGHT:
+				dash_vector = Vector2(1, -1).normalized()
+			
+			Dashing_Substate.RIGHT:
+				dash_vector = Vector2.RIGHT
+
+			Dashing_Substate.DOWN_RIGHT:
+				dash_vector = Vector2(1, 1).normalized()
+
+			Dashing_Substate.DOWN:
+				dash_vector = Vector2.DOWN
+			
+			Dashing_Substate.DOWN_LEFT:
+				dash_vector = Vector2(-1, 1).normalized()
+			
+			Dashing_Substate.LEFT:
+				dash_vector = Vector2.LEFT
+
+			Dashing_Substate.UP_LEFT:
+				dash_vector = Vector2(-1, -1).normalized()
+
+		velocity = dash_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
 
 func exit_dash():
 	dash_timer = 0.0
@@ -263,8 +276,6 @@ func _physics_process(delta: float) -> void:
 	if not is_dashing:
 		dash_cooldown_timer += delta
 
-	print(dash_timer)
-
 	# Player state 	
 	match state:
 		State.IDLING:
@@ -294,7 +305,7 @@ func _physics_process(delta: float) -> void:
 			apply_ground_walking(delta)	
 			
 			# State transition handling
-			if abs(lr_input_axis) == 0 and velocity == Vector2.ZERO:
+			if abs(lr_input_axis) <= DEADBAND and velocity == Vector2.ZERO:
 				state = State.IDLING
 
 			if can_wall:
@@ -313,7 +324,7 @@ func _physics_process(delta: float) -> void:
 			# print("WALLING")
 			# State handling
 
-			#  IMPLEMENT SO THAT THE PLAYER IS FACING AWAY FROM THE WALL THEY ARE ON
+			#  IMPLEMENT SO THAT THE PLAYER IS FACING AWAY FROM THE WALL THEY ARE ON MAYBE
 			# if lr_input_axis > DEADBAND:
 			# 	is_facing_right = true
 			# elif lr_input_axis < -DEADBAND:
@@ -331,30 +342,31 @@ func _physics_process(delta: float) -> void:
 			else:
 				walling_substate = Walling_Substate.PASSIVE_SLIDING
 
+			# MOVE INTO APPLY WALLING METHOD?????
 			match walling_substate:
 				Walling_Substate.SLOW_SLIDING:
-					print("SLOW_SLIDING")
+					# print("SLOW_SLIDING")
 					velocity.y = SLIDE_SLOW_MAX_SPEED
 
 					if abs(lr_input_axis) > 0:
 						state = State.WALKING
 
 				Walling_Substate.PASSIVE_SLIDING:
-					print("PASSIVE_SLIDING")
+					# print("PASSIVE_SLIDING")
 					velocity.y = SLIDE_PASSIVE_MAX_SPEED
 					
 					if abs(lr_input_axis) > 0:
 						state = State.WALKING
 
 				Walling_Substate.FAST_SLIDING:
-					print("FAST_SLIDING")
+					# print("FAST_SLIDING")
 					velocity.y = SLIDE_FAST_MAX_SPEED
 
 					if abs(lr_input_axis) > 0:
 						state = State.WALKING					
 
 				Walling_Substate.CLIMBING:
-					print("CLIMBING")
+					# print("CLIMBING")
 					if velocity.y <= CLIMB_MAX_SPEED and ud_input_axis > DEADBAND:
 						if velocity.y + ud_input_axis * CLIMB_ACCELERATION * delta <= CLIMB_MAX_SPEED:
 							velocity.y += ud_input_axis * CLIMB_ACCELERATION * delta
@@ -382,9 +394,9 @@ func _physics_process(delta: float) -> void:
 
 			if is_jump_pressed:
 				state = State.JUMPING
-			
+		
 		State.DASHING:
-			print("DASHING")
+			# print("DASHING")
 			# State handling
 			# Starts dash
 			if can_dash:
@@ -394,13 +406,41 @@ func _physics_process(delta: float) -> void:
 				is_dashing = true
 				dashes -= 1
 
-			var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
+				if abs(dash_input_vector.x) <= DEADBAND and dash_input_vector.y < -DEADBAND:
+					dashing_substate = Dashing_Substate.UP
+				
+				elif dash_input_vector.x > DEADBAND and dash_input_vector.y < -DEADBAND:
+					dashing_substate = Dashing_Substate.UP_RIGHT
 
-			print(percent_complete)
+				elif dash_input_vector.x > DEADBAND and abs(dash_input_vector.y) <= DEADBAND:
+					dashing_substate = Dashing_Substate.RIGHT
+
+				elif dash_input_vector.x > DEADBAND and dash_input_vector.y > DEADBAND:
+					dashing_substate = Dashing_Substate.DOWN_RIGHT
+
+				elif abs(dash_input_vector.x) <= DEADBAND and dash_input_vector.y > DEADBAND:
+					dashing_substate = Dashing_Substate.DOWN
+
+				elif dash_input_vector.x < -DEADBAND and dash_input_vector.y > DEADBAND:
+					dashing_substate = Dashing_Substate.DOWN_LEFT
+
+				elif dash_input_vector.x < -DEADBAND and abs(dash_input_vector.y) <= DEADBAND:
+					dashing_substate = Dashing_Substate.LEFT
+
+				elif dash_input_vector.x < -DEADBAND and dash_input_vector.y < -DEADBAND:
+					dashing_substate = Dashing_Substate.UP_LEFT
+
+				elif is_facing_right:
+					dashing_substate = Dashing_Substate.RIGHT
+				
+				else:
+					dashing_substate = Dashing_Substate.LEFT
+
+			var percent_complete = clamp(dash_timer / DASH_MAX_DURATION, 0, 1)
 
 			# Moves player through dash # PUT STATE MACHINE IMP. HERE, WHERE THE STATE IS PASSED INTO THE METHOD CALL
 			if is_dashing:
-				apply_dash(delta, percent_complete, Vector2.RIGHT)
+				apply_dashing(delta, percent_complete)
 			
 			if percent_complete >= 1:
 				exit_dash()	
