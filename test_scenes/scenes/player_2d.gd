@@ -8,7 +8,7 @@ signal position_updated
 const DEADBAND = 0.5
 
 # lr movement consts
-const GROUND_MAX_SPEED := 150
+const GROUND_MAX_SPEED := 110 # 150
 const GROUND_ACCELERATION := 6000 / 2
 const GROUND_DECELERATION := 9000 / 2
 const GROUND_ZERO_VELOCITY_THRESHOLD := 120 / 2
