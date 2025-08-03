@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://4u01xfrxsl1p"]
 
-[ext_resource type="Script" uid="uid://clfhwo5k0rc5o" path="res://all_scenes/test_scenes/scenes/player_2d.gd" id="1_mukur"]
+[ext_resource type="Script" uid="uid://jmbli6nuxmvc" path="res://characters/player/player_2d.gd" id="1_vh840"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u8lj1"]
 size = Vector2(8, 16)
@@ -20,10 +20,12 @@ a = Vector2(3, 0)
 b = Vector2(-5, 0)
 
 [node name="Player2D" type="CharacterBody2D"]
-script = ExtResource("1_mukur")
+z_index = 1
+script = ExtResource("1_vh840")
 
 [node name="PlayerCollision2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_u8lj1")
+debug_color = Color(0.969177, 0, 0.463067, 0.42)
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 position = Vector2(-4, -8)
