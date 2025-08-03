@@ -38,7 +38,7 @@ const MAX_DASHES := 1
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
 const DASH_END_SPEED := 100.0
 const DASH_MAX_DURATION := 0.14 / 4 * DASH_VELOCITY_SCALE
-const DASH_COOLDOWN_DURATION := 0.2
+const DASH_COOLDOWN_DURATION := 0.1
 
 # Jump consts
 const GROUND_JUMP_SPEED := 300 / 2
@@ -250,8 +250,6 @@ func exit_dash():
 	is_dashing = false
 
 func _physics_process(delta: float) -> void:
-	print("ground", ground_and_wall_jump_cooldown_timer)
-	print("air", air_jump_cooldown_timer)
 	# Signals emit
 	velocity_updated.emit(delta, velocity)
 	position_updated.emit(delta, position)
@@ -475,7 +473,6 @@ func _physics_process(delta: float) -> void:
 			# State handling
 			apply_air_walking(delta)
 
-			#  NEED TO ADD JUMP COOLDOWN SOMEWHERE
 			if can_ground_jump:
 				if is_jump_pressed:
 					is_jumping = true
@@ -483,14 +480,17 @@ func _physics_process(delta: float) -> void:
 			
 				# Substate selection
 				if is_on_ground:
+					print("GROUND_JUMPING")
 					jumping_substate = Jumping_Substate.GROUND_JUMPING
 					ground_jumps -= 1
 
 				elif is_climbing:
+					print("CLIMB_JUMPING")
 					jumping_substate = Jumping_Substate.CLIMB_JUMPING
 					ground_jumps -= 1
 
 				elif is_sliding:
+					print("SLIDE_JUMPING")
 					jumping_substate = Jumping_Substate.SLIDE_JUMPING # NEED TO ADD HORIZONTAL COMPONENT
 					ground_jumps -= 1
 				
@@ -498,6 +498,7 @@ func _physics_process(delta: float) -> void:
 				if is_jump_pressed:
 					is_jumping = true
 					jump_timer = 0.0
+				print("AIR_JUMPING")
 				jumping_substate = Jumping_Substate.AIR_JUMPING
 				air_jumps -= 1
 
@@ -534,8 +535,8 @@ func _physics_process(delta: float) -> void:
 				state = State.WALLING
 				
 			if is_dash_just_pressed: # NOT WORKING FOR SOME REASON
-				state = State.DASHING
 				is_jumping = false
+				state = State.DASHING
 
 			if not is_jumping and not is_on_ground:
 				state = State.FALLING
