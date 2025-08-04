@@ -474,25 +474,26 @@ func _physics_process(delta: float) -> void:
 			
 				# Substate selection
 				if is_on_ground:
-					print("GROUND_JUMPING")
+					# print("GROUND_JUMPING")
 					jumping_substate = Jumping_Substate.GROUND_JUMPING
 					ground_jumps -= 1
 
 				elif is_climbing:
-					print("CLIMB_JUMPING")
+					# print("CLIMB_JUMPING")
 					jumping_substate = Jumping_Substate.CLIMB_JUMPING
 					ground_jumps -= 1
 
 				elif is_sliding:
-					print("SLIDE_JUMPING")
+					# print("SLIDE_JUMPING")
 					jumping_substate = Jumping_Substate.SLIDE_JUMPING # NEED TO ADD HORIZONTAL COMPONENT
 					ground_jumps -= 1
 				
 			elif can_air_jump:
+				# print("AIR_JUMPING")
 				if is_jump_pressed:
 					is_jumping = true
 					jump_timer = 0.0
-				print("AIR_JUMPING")
+					
 				jumping_substate = Jumping_Substate.AIR_JUMPING
 				air_jumps -= 1
 
