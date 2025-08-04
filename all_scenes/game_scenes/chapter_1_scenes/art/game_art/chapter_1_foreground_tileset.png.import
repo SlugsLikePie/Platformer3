@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dug8crf0nf0q2"
-path="res://.godot/imported/template_scene_foreground_tileset.png-2eb1ba29633e03b7331266a5e034f207.ctex"
+path="res://.godot/imported/chapter_1_foreground_tileset.png-60db7a7ea123d87e6b1f249a27f5e36b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/template_scene_foreground_tileset.png"
-dest_files=["res://.godot/imported/template_scene_foreground_tileset.png-2eb1ba29633e03b7331266a5e034f207.ctex"]
+source_file="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_foreground_tileset.png"
+dest_files=["res://.godot/imported/chapter_1_foreground_tileset.png-60db7a7ea123d87e6b1f249a27f5e36b.ctex"]
 
 [params]
 

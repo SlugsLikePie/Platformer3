@@ -3,12 +3,12 @@
 [ext_resource type="PackedScene" uid="uid://4u01xfrxsl1p" path="res://characters/player/player_2d.tscn" id="1_sy8cf"]
 [ext_resource type="PackedScene" uid="uid://bom1esseecr07" path="res://characters/cameras/stationary_camera.tscn" id="2_ulwbj"]
 [ext_resource type="PackedScene" uid="uid://bruoor6ydjtcs" path="res://utilities/scene_switcher.tscn" id="3_t07g0"]
-[ext_resource type="Texture2D" uid="uid://cm6mu1j1ig4s1" path="res://all_scenes/template_scenes/chapter_scenes_template/art/game_art/template_scene_background_tileset.png" id="4_rfl73"]
-[ext_resource type="Texture2D" uid="uid://o8s0vvti78i3" path="res://all_scenes/template_scenes/chapter_scenes_template/art/game_art/template_scene_midground_tileset.png" id="5_53fu0"]
-[ext_resource type="Texture2D" uid="uid://c8uclxhodum6a" path="res://all_scenes/template_scenes/chapter_scenes_template/art/game_art/template_scene_foreground_tileset.png" id="6_4iax3"]
+[ext_resource type="Texture2D" uid="uid://c7sb8niti6m8v" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_background_tileset.png" id="4_l2k7a"]
+[ext_resource type="Texture2D" uid="uid://bgrlekcawc56p" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_midground_tileset.png" id="5_w7vxb"]
+[ext_resource type="Texture2D" uid="uid://dug8crf0nf0q2" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_foreground_tileset.png" id="6_8ud25"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_wupwm"]
-texture = ExtResource("4_rfl73")
+texture = ExtResource("4_l2k7a")
 texture_region_size = Vector2i(4, 4)
 0:0/0 = 0
 0:1/0 = 0
@@ -36,7 +36,7 @@ tile_size = Vector2i(4, 4)
 sources/0 = SubResource("TileSetAtlasSource_wupwm")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_gnnic"]
-texture = ExtResource("5_53fu0")
+texture = ExtResource("5_w7vxb")
 texture_region_size = Vector2i(4, 4)
 0:0/0 = 0
 0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-2, -2, 2, -2, 2, 2, -2, 2)
@@ -85,7 +85,7 @@ physics_layer_0/collision_layer = 1
 sources/1 = SubResource("TileSetAtlasSource_gnnic")
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mpc28"]
-texture = ExtResource("6_4iax3")
+texture = ExtResource("6_8ud25")
 texture_region_size = Vector2i(4, 4)
 0:0/0 = 0
 1:0/0 = 0
