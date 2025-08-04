@@ -41,7 +41,11 @@ enabled=PackedStringArray()
 folder_colors={
 "res://all_scenes/": "green",
 "res://all_scenes/game_scenes/chapter_1_scenes/": "teal",
+"res://all_scenes/game_scenes/chapter_1_scenes/art/color_palettes/": "gray",
+"res://all_scenes/game_scenes/chapter_1_scenes/art/original_art/": "gray",
 "res://all_scenes/template_scenes/chapter_scenes_template/": "teal",
+"res://all_scenes/template_scenes/chapter_scenes_template/art/color_palettes/": "gray",
+"res://all_scenes/template_scenes/chapter_scenes_template/art/original_art/": "gray",
 "res://all_scenes/test_scenes/art/": "teal",
 "res://all_scenes/test_scenes/scenes/": "teal",
 "res://characters/": "blue",

@@ -6,6 +6,7 @@ enum Scenes {
     TEMPLATE_SCENE,
     # Game scenes
     # Chapter 1
+    CHAPTER_1_1
 }
 
 var current_scene := Scenes.TEST_SCENE
@@ -18,6 +19,9 @@ func _input(event: InputEvent) -> void:
     elif event.is_action_pressed("2"):
         load_scene(Scenes.TEMPLATE_SCENE)
 
+    elif event.is_action_pressed("3"):
+        load_scene(Scenes.CHAPTER_1_1)
+
 
 func load_scene(scene: Scenes):
     match scene:
@@ -26,4 +30,9 @@ func load_scene(scene: Scenes):
 
         Scenes.TEMPLATE_SCENE:
             get_tree().change_scene_to_file("res://all_scenes/template_scenes/chapter_scenes_template/scenes/template_scene.tscn")
+
+        Scenes.CHAPTER_1_1:
+            get_tree().change_scene_to_file("C:/Users/Pie/ProgSpace/Platformer3/all_scenes/game_scenes/chapter_1_scenes/scenes/chapter_1_1.tscn")
+
+            
     current_scene = scene
