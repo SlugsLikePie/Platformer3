@@ -41,7 +41,7 @@ const DASH_MAX_DURATION := 0.0233333333 * DASH_VELOCITY_SCALE
 const DASH_COOLDOWN_DURATION := 0.1
 
 # Jump consts
-const GROUND_JUMP_SPEED := 300 / 2
+const GROUND_JUMP_SPEED := 120
 const AIR_JUMP_SPEED := 250 / 2
 const CLIMBING_JUMP_SPEED := 150
 const SLIDING_JUMP_VELOCITY := Vector2(300, 100) / 2
@@ -493,7 +493,7 @@ func _physics_process(delta: float) -> void:
 				if is_jump_pressed:
 					is_jumping = true
 					jump_timer = 0.0
-					
+
 				jumping_substate = Jumping_Substate.AIR_JUMPING
 				air_jumps -= 1
 
