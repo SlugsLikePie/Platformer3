@@ -32,12 +32,12 @@ const SLIDE_SLOW_ACCELERATION := 1000 / 2
 const SLIDE_FAST_MAX_SPEED := 500 / 2
 const SLIDE_FAST_ACCELERATION := 1000 / 2
 
-# Dash consts
-const DASH_VELOCITY_SCALE = 3.8 * 1.5
+# Dash consts. Note: the dash should remain ~45px long
+const DASH_VELOCITY_SCALE = 5.7
 const MAX_DASHES := 1
 const DASH_START_SPEED := 3000 / DASH_VELOCITY_SCALE
 const DASH_END_SPEED := 100.0
-const DASH_MAX_DURATION := 0.14 / 4 * DASH_VELOCITY_SCALE
+const DASH_MAX_DURATION := 0.0233333333 * DASH_VELOCITY_SCALE
 const DASH_COOLDOWN_DURATION := 0.1
 
 # Jump consts
@@ -407,6 +407,7 @@ func _physics_process(delta: float) -> void:
 			# print("DASHING")
 			# State handling
 			# Starts dash
+
 			if can_dash:
 				dash_input_vector = Input.get_vector("left", "right", "up", "down")
 				dash_timer = 0.0
