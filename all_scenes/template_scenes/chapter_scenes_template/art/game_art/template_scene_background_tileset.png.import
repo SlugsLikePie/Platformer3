@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dw1kwwcx5xkoq"
-path="res://.godot/imported/test_scene.png-5929d024698d7c72339e86bcedde3bde.ctex"
+uid="uid://cm6mu1j1ig4s1"
+path="res://.godot/imported/template_scene_background_tileset.png-7cf89c19757f484025186461258b98e5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://all_scenes/test_scenes/art/game_art/test_scene.png"
-dest_files=["res://.godot/imported/test_scene.png-5929d024698d7c72339e86bcedde3bde.ctex"]
+source_file="res://all_scenes/template_scenes/chapter_scenes_template/art/game_art/template_scene_background_tileset.png"
+dest_files=["res://.godot/imported/template_scene_background_tileset.png-7cf89c19757f484025186461258b98e5.ctex"]
 
 [params]
 

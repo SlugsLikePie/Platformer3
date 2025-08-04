@@ -120,6 +120,10 @@ sources/0 = SubResource("TileSetAtlasSource_gt82i")
 [node name="Player2D" parent="." instance=ExtResource("6_7gxbu")]
 position = Vector2(0, 8)
 
+[node name="StationaryCamera" parent="." instance=ExtResource("6_smxrb")]
+
+[node name="SceneSwitcher" parent="." instance=ExtResource("7_smxrb")]
+
 [node name="WorldWalls" type="StaticBody2D" parent="."]
 position = Vector2(1, 90)
 
@@ -167,7 +171,3 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 script = ExtResource("3_kymn1")
-
-[node name="StationaryCamera" parent="." instance=ExtResource("6_smxrb")]
-
-[node name="SceneSwitcher" parent="." instance=ExtResource("7_smxrb")]

@@ -14,6 +14,9 @@ var current_scene := Scenes.TEST_SCENE
 func _input(event: InputEvent) -> void:
     if event.is_action_pressed("1"):
         load_scene(Scenes.TEST_SCENE)
+    
+    elif event.is_action_pressed("2"):
+        load_scene(Scenes.TEMPLATE_SCENE)
 
 
 func load_scene(scene: Scenes):
@@ -21,4 +24,6 @@ func load_scene(scene: Scenes):
         Scenes.TEST_SCENE:
             get_tree().change_scene_to_file("res://all_scenes/test_scenes/scenes/test_scene.tscn")
 
+        Scenes.TEMPLATE_SCENE:
+            get_tree().change_scene_to_file("res://all_scenes/template_scenes/chapter_scenes_template/scenes/template_scene.tscn")
     current_scene = scene

@@ -36,6 +36,19 @@ version_control/autoload_on_startup=true
 
 enabled=PackedStringArray()
 
+[file_customization]
+
+folder_colors={
+"res://all_scenes/game_scenes/": "green",
+"res://all_scenes/template_scenes/": "gray",
+"res://all_scenes/template_scenes/chapter_scenes_template/": "yellow",
+"res://all_scenes/template_scenes/chapter_scenes_template/art/": "teal",
+"res://all_scenes/template_scenes/chapter_scenes_template/scenes/": "pink",
+"res://all_scenes/test_scenes/": "red",
+"res://all_scenes/test_scenes/art/": "teal",
+"res://all_scenes/test_scenes/scenes/": "pink"
+}
+
 [input]
 
 left={
