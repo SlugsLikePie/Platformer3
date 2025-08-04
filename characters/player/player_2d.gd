@@ -14,7 +14,7 @@ const GROUND_DECELERATION := 9000 / 2
 const GROUND_ZERO_VELOCITY_THRESHOLD := 120 / 2
 const AIR_MAX_SPEED := GROUND_MAX_SPEED
 const AIR_ACCELERATION := GROUND_ACCELERATION * 0.75
-const AIR_DECELERATION := GROUND_DECELERATION * 0.75
+const AIR_DECELERATION := GROUND_DECELERATION * 0.07
 const AIR_ZERO_VELOCITY_THRESHOLD := GROUND_ZERO_VELOCITY_THRESHOLD
 
 # ud movement consts
@@ -43,8 +43,8 @@ const DASH_COOLDOWN_DURATION := 0.1
 # Jump consts
 const GROUND_JUMP_SPEED := 300 / 2
 const AIR_JUMP_SPEED := 250 / 2
-const CLIMBING_JUMP_VELOCITY := Vector2(200, 500) / 2
-const SLIDING_JUMP_VELOCITY := Vector2(200, 100) / 2
+const CLIMBING_JUMP_SPEED := 150
+const SLIDING_JUMP_VELOCITY := Vector2(300, 100) / 2
 const JUMP_CANCEL_SPEED := 200 # UNUSED CURRENTLY PROBABLY DELETE
 const JUMP_MAX_DURATION := 0.1
 const GROUND_AND_WALL_JUMP_COOLDOWN_DURATION := 0.1 # SEPERATE INTO 2 VARS, OR JUST REMOVE THE GROUND TIMER, CHANGE BACK TO 0.2. WILL NEED A SEPERATE can_wall_jump var TOO
@@ -331,13 +331,6 @@ func _physics_process(delta: float) -> void:
 		State.WALLING:
 			# print("WALLING")
 			# State handling
-
-			#  IMPLEMENT SO THAT THE PLAYER IS FACING AWAY FROM THE WALL THEY ARE ON MAYBE
-			# if lr_input_axis > DEADBAND:
-			# 	is_facing_right = true
-			# elif lr_input_axis < -DEADBAND:
-			# 	is_facing_right = false
-
 			if is_grab_pressed:
 				walling_substate = Walling_Substate.CLIMBING
 
@@ -513,12 +506,18 @@ func _physics_process(delta: float) -> void:
 
 					Jumping_Substate.CLIMB_JUMPING:
 						# print("CLIMB_JUMPING")
-						velocity.y = -CLIMBING_JUMP_VELOCITY.y
+						velocity.y = -CLIMBING_JUMP_SPEED
 						ground_and_wall_jump_cooldown_timer = 0
 
 					Jumping_Substate.SLIDE_JUMPING:
 						# print("SLIDE_JUMPING")
 						velocity.y = -SLIDING_JUMP_VELOCITY.y
+
+						if is_on_left_wall:
+							velocity.x = SLIDING_JUMP_VELOCITY.x
+						if is_on_right_wall:
+							velocity.x = -SLIDING_JUMP_VELOCITY.x
+
 						ground_and_wall_jump_cooldown_timer = 0
 					
 					Jumping_Substate.AIR_JUMPING:
