@@ -171,3 +171,5 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 script = ExtResource("3_kymn1")
+
+[connection signal="velocity_updated" from="Player2D" to="DebugTextLabel" method="_on_player_2d_velocity_updated"]
