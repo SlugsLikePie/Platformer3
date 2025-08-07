@@ -25,7 +25,6 @@ window/size/window_width_override=1920
 window/size/window_height_override=1080
 window/stretch/mode="viewport"
 window/stretch/scale_mode="integer"
-window/vsync/vsync_mode=0
 
 [editor]
 
@@ -50,8 +49,8 @@ folder_colors={
 "res://all_scenes/test_scenes/scenes/": "teal",
 "res://characters/": "blue",
 "res://characters/cameras/": "purple",
-"res://characters/player/": "purple",
-"res://characters/snap_light/": "purple"
+"res://characters/medium_light/": "purple",
+"res://characters/player/": "purple"
 }
 
 [input]
@@ -130,6 +129,7 @@ jump={
 
 [physics]
 
+common/physics_ticks_per_second=240
 2d/physics_engine="GodotPhysics2D"
 2d/default_gravity=900.0
 
