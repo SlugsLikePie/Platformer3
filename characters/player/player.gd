@@ -36,7 +36,7 @@ const SLIDE_FAST_MAX_SPEED := 250
 const SLIDE_FAST_ACCELERATION := 500
 const WALLING_IGNORE_LIST := [
 	"Player",
-	"WorldWalls"
+	"WorldWalls",
 ]
 
 # Dash consts. Note: the dash should remain ~45px long
@@ -69,7 +69,7 @@ enum State {
 	WALLING,
 	DASHING,
 	JUMPING,
-	FALLING
+	FALLING,
 }
 
 enum Walking_Substate { }
@@ -78,7 +78,7 @@ enum Walling_Substate {
 	SLOW_SLIDING,
 	PASSIVE_SLIDING,
 	FAST_SLIDING,
-	CLIMBING
+	CLIMBING,
 }
 
 enum Dashing_Substate {
@@ -96,13 +96,13 @@ enum Jumping_Substate {
 	GROUND_JUMPING,
 	CLIMB_JUMPING,
 	SLIDE_JUMPING,
-	AIR_JUMPING
+	AIR_JUMPING,
 }
 
 enum Falling_Substate {
 	SLOW_FALLING,
 	PASSIVE_FALLING,
-	FAST_FALLING
+	FAST_FALLING,
 }
 
 # Environment info vars
