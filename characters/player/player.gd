@@ -34,6 +34,10 @@ const SLIDE_SLOW_MAX_SPEED := 150
 const SLIDE_SLOW_ACCELERATION := 500
 const SLIDE_FAST_MAX_SPEED := 250
 const SLIDE_FAST_ACCELERATION := 500
+const WALLING_IGNORE_LIST := [
+	"Player",
+	"WorldWalls"
+]
 
 # Dash consts. Note: the dash should remain ~45px long
 const DASH_VELOCITY_SCALE = 5.7
@@ -105,6 +109,7 @@ enum Falling_Substate {
 var is_on_ground := false
 var is_on_left_wall := false
 var is_on_right_wall := false
+var body_entered_name := ""
 
 # Movement vars
 var is_facing_right = true
@@ -153,6 +158,7 @@ var falling_substate := Falling_Substate.PASSIVE_FALLING
 
 # func _process(delta: float) -> void:
 
+
 # MOVE USER INPUTS TO A _INPUT/_UNHANDLED_INPUT FUNC OR SOMETHING PROBABLY
 func get_inputs() -> void:
 	lr_input_axis = Input.get_axis("left", "right")
@@ -189,6 +195,7 @@ func apply_ground_walking(delta: float) -> void:
 		else:
 			velocity.x = 0
 
+
 func apply_air_walking(delta: float) -> void:
 	if lr_input_axis > DEADBAND:
 		is_facing_right = true
@@ -212,6 +219,7 @@ func apply_air_walking(delta: float) -> void:
 			velocity.x += AIR_DECELERATION * delta
 		else:
 			velocity.x = 0
+
 
 func apply_dashing(delta: float, percent_complete: float):
 	# if is_dashing:
@@ -244,13 +252,14 @@ func apply_dashing(delta: float, percent_complete: float):
 
 		velocity = dash_vector * lerp(DASH_START_SPEED, DASH_END_SPEED, percent_complete)
 
+
 func exit_dash():
 	dash_timer = 0.0
 	dash_cooldown_timer = 0
 	is_dashing = false
 
+
 func _physics_process(delta: float) -> void:
-	print(velocity)
 	# Signals emit
 	velocity_updated.emit(delta, velocity)
 	position_updated.emit(delta, position)
@@ -584,23 +593,33 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 
+
+func body_entered_name_equals(test_name: String) -> bool:
+	return test_name == body_entered_name
+
+
 func _on_left_wall_detection_area_2d_body_entered(body: Node2D) -> void:
-	if body.get_name() != "Player":
+	body_entered_name = body.get_name()
+	if !WALLING_IGNORE_LIST.any(body_entered_name_equals):
 		is_on_left_wall = true
 
 
 func _on_left_wall_detection_area_2d_body_exited(body: Node2D) -> void:
-	if body.get_name() != "Player":
+	body_entered_name = body.get_name()
+	if !WALLING_IGNORE_LIST.any(body_entered_name_equals):
 		is_on_left_wall = false
 
 
 func _on_right_wall_detection_area_2d_body_entered(body: Node2D) -> void:
-	if body.get_name() != "Player":
+	body_entered_name = body.get_name()
+	if !WALLING_IGNORE_LIST.any(body_entered_name_equals):
 		is_on_right_wall = true
 
 
+
 func _on_right_wall_detection_area_2d_body_exited(body: Node2D) -> void:
-	if body.get_name() != "Player":
+	body_entered_name = body.get_name()
+	if !WALLING_IGNORE_LIST.any(body_entered_name_equals):
 		is_on_right_wall = false
 
 
