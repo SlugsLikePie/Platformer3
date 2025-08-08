@@ -171,6 +171,7 @@ func get_inputs() -> void:
 	
 	is_grab_pressed = (Input.is_action_pressed("grab") or is_grab_inverted) and not (Input.is_action_pressed("grab") and is_grab_inverted)
 
+
 func apply_ground_walking(delta: float) -> void:
 	if lr_input_axis > DEADBAND:
 		is_facing_right = true
@@ -614,7 +615,6 @@ func _on_right_wall_detection_area_2d_body_entered(body: Node2D) -> void:
 	body_entered_name = body.get_name()
 	if !WALLING_IGNORE_LIST.any(body_entered_name_equals):
 		is_on_right_wall = true
-
 
 
 func _on_right_wall_detection_area_2d_body_exited(body: Node2D) -> void:
