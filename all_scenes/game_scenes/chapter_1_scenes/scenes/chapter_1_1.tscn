@@ -283,7 +283,7 @@ sources/0 = SubResource("TileSetAtlasSource_mpc28")
 [node name="PlayerMediumLight" parent="Player" instance=ExtResource("2_8ud25")]
 energy = 0.1
 
-[node name="StationaryCamera" parent="Player" instance=ExtResource("2_ulwbj")]
+[node name="StationaryCamera" parent="." instance=ExtResource("2_ulwbj")]
 
 [node name="SceneSwitcher" parent="." instance=ExtResource("3_t07g0")]
 
@@ -339,24 +339,24 @@ tile_map_data = PackedByteArray("AAD+/wkAAAABAAIAAAD+/woAAAABAAMAAAD+/wcAAAABAAI
 tile_set = SubResource("TileSet_vo3hs")
 
 [node name="WorldWalls" type="StaticBody2D" parent="."]
-position = Vector2(1, 90)
+position = Vector2(0, 90)
 
-[node name="Left" type="CollisionShape2D" parent="WorldWalls"]
-position = Vector2(-163, -96)
+[node name="LeftWall" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(-162, -96)
 rotation = 1.5708
 shape = SubResource("WorldBoundaryShape2D_wmywy")
 
-[node name="Right" type="CollisionShape2D" parent="WorldWalls"]
-position = Vector2(161, -96)
+[node name="RightWall" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(162, -96)
 rotation = -1.5708
 shape = SubResource("WorldBoundaryShape2D_wmywy")
 
-[node name="Up" type="CollisionShape2D" parent="WorldWalls"]
+[node name="UpWall" type="CollisionShape2D" parent="WorldWalls"]
 position = Vector2(0, -184)
 rotation = -3.14159
 shape = SubResource("WorldBoundaryShape2D_wmywy")
 
-[node name="Down" type="CollisionShape2D" parent="WorldWalls"]
+[node name="DownWall" type="CollisionShape2D" parent="WorldWalls"]
 position = Vector2(0, 4)
 shape = SubResource("WorldBoundaryShape2D_wmywy")
 

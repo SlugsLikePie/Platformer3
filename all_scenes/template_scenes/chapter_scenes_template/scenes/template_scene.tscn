@@ -112,7 +112,7 @@ texture_region_size = Vector2i(4, 4)
 tile_size = Vector2i(4, 4)
 sources/0 = SubResource("TileSetAtlasSource_mpc28")
 
-[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_wmywy"]
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_f5elp"]
 
 [node name="DefaultTemplateScene" type="Node2D"]
 
@@ -137,22 +137,23 @@ z_index = 1
 tile_set = SubResource("TileSet_vo3hs")
 
 [node name="WorldWalls" type="StaticBody2D" parent="."]
-position = Vector2(1, 90)
+position = Vector2(0, 90)
 
-[node name="Left" type="CollisionShape2D" parent="WorldWalls"]
+[node name="LeftWall" type="CollisionShape2D" parent="WorldWalls"]
 position = Vector2(-162, -96)
 rotation = 1.5708
-shape = SubResource("WorldBoundaryShape2D_wmywy")
+shape = SubResource("WorldBoundaryShape2D_f5elp")
 
-[node name="Right" type="CollisionShape2D" parent="WorldWalls"]
-position = Vector2(160, -96)
+[node name="RightWall" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(162, -96)
 rotation = -1.5708
-shape = SubResource("WorldBoundaryShape2D_wmywy")
+shape = SubResource("WorldBoundaryShape2D_f5elp")
 
-[node name="Up" type="CollisionShape2D" parent="WorldWalls"]
+[node name="UpWall" type="CollisionShape2D" parent="WorldWalls"]
 position = Vector2(0, -184)
 rotation = -3.14159
-shape = SubResource("WorldBoundaryShape2D_wmywy")
+shape = SubResource("WorldBoundaryShape2D_f5elp")
 
-[node name="Down" type="CollisionShape2D" parent="WorldWalls"]
-shape = SubResource("WorldBoundaryShape2D_wmywy")
+[node name="DownWall" type="CollisionShape2D" parent="WorldWalls"]
+position = Vector2(0, 4)
+shape = SubResource("WorldBoundaryShape2D_f5elp")
