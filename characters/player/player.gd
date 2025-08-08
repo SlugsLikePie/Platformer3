@@ -24,8 +24,8 @@ const AIR_ZERO_VELOCITY_THRESHOLD := GROUND_ZERO_VELOCITY_THRESHOLD
 const CLIMB_MAX_SPEED := 75
 const MAX_GROUND_JUMPS := 1
 const MAX_AIR_JUMPS := 0
-const CLIMB_ACCELERATION := 1000 # 5000
-const CLIMB_DECELERATION := 1000 # 5000
+const CLIMB_ACCELERATION := 3000 # 5000
+const CLIMB_DECELERATION := 3000 # 5000
 const CLIMB_ZERO_THRESHOLD := 20 # 75
 # REWORK PASSIVE AND ACTIVE TO HAVE SEPERATE UP/DOWN VARIABLES MAYBE or don't, idk
 const SLIDE_PASSIVE_MAX_SPEED := 200
@@ -585,30 +585,30 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _on_left_wall_detection_area_2d_body_entered(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_left_wall = true
 
 
 func _on_left_wall_detection_area_2d_body_exited(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_left_wall = false
 
 
 func _on_right_wall_detection_area_2d_body_entered(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_right_wall = true
 
 
 func _on_right_wall_detection_area_2d_body_exited(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_right_wall = false
 
 
 func _on_ground_detection_area_2d_body_entered(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_ground = true
 	
 
 func _on_ground_detection_area_2d_body_exited(body: Node2D) -> void:
-	if body.get_name() != "Player2D":
+	if body.get_name() != "Player":
 		is_on_ground = false

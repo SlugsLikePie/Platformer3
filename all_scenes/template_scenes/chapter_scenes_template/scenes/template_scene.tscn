@@ -116,7 +116,7 @@ sources/0 = SubResource("TileSetAtlasSource_mpc28")
 
 [node name="DefaultTemplateScene" type="Node2D"]
 
-[node name="Player2D" parent="." instance=ExtResource("1_f5elp")]
+[node name="Player" parent="." instance=ExtResource("1_f5elp")]
 
 [node name="StationaryCamera" parent="." instance=ExtResource("2_xqmym")]
 

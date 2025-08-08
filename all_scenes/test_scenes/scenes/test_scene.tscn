@@ -117,7 +117,7 @@ sources/0 = SubResource("TileSetAtlasSource_gt82i")
 
 [node name="TestScene" type="Node2D"]
 
-[node name="Player2D" parent="." instance=ExtResource("6_7gxbu")]
+[node name="Player" parent="." instance=ExtResource("6_7gxbu")]
 position = Vector2(0, 8)
 
 [node name="StationaryCamera" parent="." instance=ExtResource("6_smxrb")]
@@ -172,4 +172,4 @@ scroll_active = false
 autowrap_mode = 0
 script = ExtResource("3_kymn1")
 
-[connection signal="velocity_updated" from="Player2D" to="DebugTextLabel" method="_on_player_2d_velocity_updated"]
+[connection signal="velocity_updated" from="Player" to="DebugTextLabel" method="_on_player_2d_velocity_updated"]
