@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://4u01xfrxsl1p"]
 
-[ext_resource type="Script" uid="uid://jmbli6nuxmvc" path="res://characters/player/player_2d.gd" id="1_vh840"]
+[ext_resource type="Script" uid="uid://jmbli6nuxmvc" path="res://characters/player/player.gd" id="1_vh840"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u8lj1"]
 size = Vector2(8, 16)
@@ -19,7 +19,7 @@ b = Vector2(0, 8)
 a = Vector2(3, 0)
 b = Vector2(-5, 0)
 
-[node name="Player2D" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D"]
 z_index = 1
 script = ExtResource("1_vh840")
 

@@ -7,16 +7,16 @@ colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
 
 [sub_resource type="GradientTexture2D" id="GradientTexture2D_8ud25"]
 gradient = SubResource("Gradient_w7vxb")
-width = 32
-height = 32
+width = 16
+height = 16
 fill = 1
 fill_from = Vector2(0.5, 0.5)
 
 [node name="MediumLight" type="PointLight2D"]
 light_mask = 7
 z_as_relative = false
-scale = Vector2(2, 2)
-energy = 0.5
+scale = Vector2(4, 4)
+energy = 1.26
 range_item_cull_mask = 3
 shadow_enabled = true
 shadow_item_cull_mask = 2

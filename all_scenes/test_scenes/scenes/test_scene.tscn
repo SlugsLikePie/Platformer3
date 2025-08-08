@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://50eupvcnw52e" path="res://all_scenes/test_scenes/art/game_art/test_scene_midground_tileset.png" id="4_5u3au"]
 [ext_resource type="Texture2D" uid="uid://bmshjl7yi27hx" path="res://all_scenes/test_scenes/art/game_art/test_scene_background_tileset.png" id="4_s8q2u"]
 [ext_resource type="Texture2D" uid="uid://cxfje6t22yg3f" path="res://all_scenes/test_scenes/art/game_art/test_scene_foreground_tileset.png" id="6_3ym4i"]
-[ext_resource type="PackedScene" uid="uid://4u01xfrxsl1p" path="res://characters/player/player_2d.tscn" id="6_7gxbu"]
+[ext_resource type="PackedScene" uid="uid://4u01xfrxsl1p" path="res://characters/player/player.tscn" id="6_7gxbu"]
 [ext_resource type="PackedScene" uid="uid://bom1esseecr07" path="res://characters/cameras/stationary_camera.tscn" id="6_smxrb"]
 [ext_resource type="PackedScene" uid="uid://bruoor6ydjtcs" path="res://utilities/scene_switcher.tscn" id="7_smxrb"]
 

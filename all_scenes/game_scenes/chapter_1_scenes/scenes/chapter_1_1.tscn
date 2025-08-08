@@ -1,13 +1,21 @@
-[gd_scene load_steps=26 format=4 uid="uid://bso4qrp0h1ty0"]
+[gd_scene load_steps=27 format=4 uid="uid://bso4qrp0h1ty0"]
 
-[ext_resource type="PackedScene" uid="uid://4u01xfrxsl1p" path="res://characters/player/player_2d.tscn" id="1_sy8cf"]
+[ext_resource type="PackedScene" uid="uid://4u01xfrxsl1p" path="res://characters/player/player.tscn" id="1_sy8cf"]
 [ext_resource type="PackedScene" uid="uid://fr4126r8ggkr" path="res://characters/medium_light/medium_light.tscn" id="2_8ud25"]
 [ext_resource type="PackedScene" uid="uid://bom1esseecr07" path="res://characters/cameras/stationary_camera.tscn" id="2_ulwbj"]
 [ext_resource type="PackedScene" uid="uid://bruoor6ydjtcs" path="res://utilities/scene_switcher.tscn" id="3_t07g0"]
 [ext_resource type="Texture2D" uid="uid://c7sb8niti6m8v" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_background_tileset.png" id="4_l2k7a"]
-[ext_resource type="Texture2D" uid="uid://b4t7qnqn13l8y" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_background_sprite.png" id="5_8ud25"]
 [ext_resource type="Texture2D" uid="uid://bgrlekcawc56p" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_midground_tileset.png" id="5_w7vxb"]
 [ext_resource type="Texture2D" uid="uid://dug8crf0nf0q2" path="res://all_scenes/game_scenes/chapter_1_scenes/art/game_art/chapter_1_foreground_tileset.png" id="6_8ud25"]
+
+[sub_resource type="Gradient" id="Gradient_w7vxb"]
+colors = PackedColorArray(0.639216, 0.858824, 1, 1, 0.780392, 1, 0.945098, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_8ud25"]
+gradient = SubResource("Gradient_w7vxb")
+width = 80
+height = 46
+fill_to = Vector2(0, 1)
 
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_7rinh"]
 polygon = PackedVector2Array(-2, -2, -2, 2, 2, 2, 2, -2)
@@ -217,7 +225,8 @@ color = Color(0.917416, 0.924894, 0.926765, 1)
 
 [node name="Backdrop" type="Sprite2D" parent="TestScene"]
 z_index = -2
-texture = ExtResource("5_8ud25")
+scale = Vector2(4, 4)
+texture = SubResource("GradientTexture2D_8ud25")
 
 [node name="Background" type="TileMapLayer" parent="TestScene"]
 z_as_relative = false
