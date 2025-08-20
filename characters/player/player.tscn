@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://jmbli6nuxmvc" path="res://characters/player/player.gd" id="1_vh840"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_u8lj1"]
-size = Vector2(8, 16)
+size = Vector2(6, 16)
 
 [sub_resource type="CanvasTexture" id="CanvasTexture_7vfq7"]
 
@@ -24,6 +24,7 @@ z_index = 1
 script = ExtResource("1_vh840")
 
 [node name="PlayerCollision2D" type="CollisionShape2D" parent="."]
+scale = Vector2(0.9, 1)
 shape = SubResource("RectangleShape2D_u8lj1")
 debug_color = Color(0.969177, 0, 0.463067, 0.42)
 
@@ -33,13 +34,13 @@ scale = Vector2(8, 16)
 texture = SubResource("CanvasTexture_7vfq7")
 
 [node name="LeftWallDetectionArea2D" type="Area2D" parent="."]
-position = Vector2(-4.4, 0)
+position = Vector2(-3.4, 0)
 
 [node name="LeftWallDetectionCollisionShape2D" type="CollisionShape2D" parent="LeftWallDetectionArea2D"]
 shape = SubResource("SegmentShape2D_6r7w4")
 
 [node name="RightWallDetectionArea2D" type="Area2D" parent="."]
-position = Vector2(4.4, 0)
+position = Vector2(3.4, 0)
 
 [node name="RightWallDetectionCollisionShape2D" type="CollisionShape2D" parent="RightWallDetectionArea2D"]
 shape = SubResource("SegmentShape2D_ftsyd")
